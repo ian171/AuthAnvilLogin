@@ -54,6 +54,9 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
                         String input = stateSnapshot.getText(); // 获取玩家输入的文本
                         handleLogin(player, input);
                     }
+                    if (slot == AnvilGUI.Slot.OUTPUT){
+                        player.sendMessage("你点击了输出栏");
+                    }
                     // 处理点击事件
                     return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
                         // 完成时执行的代码
@@ -75,24 +78,24 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             player.sendMessage("你还没有注册，请先注册！");
         }
     }
-    @EventHandler
-    public void onInventoryClick(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-
-        // 检查玩家是否在操作铁砧UI
-        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ANVIL) {
-            String password = "";  // 从UI中获取玩家输入的密码（具体实现需要进一步补充）
-
-            // 处理密码验证
-            if (api.isRegistered(player.getName())) {
-                if (api.checkPassword(player.getName(), password)) {
-                    player.sendMessage("登录成功！");
-                } else {
-                    player.sendMessage("密码错误，请重新尝试！");
-                }
-            } else {
-                player.sendMessage("你还没有注册，请先注册！");
-            }
-        }
-    }
+//    @EventHandler
+//    public void onInventoryClick(PlayerInteractEvent event) {
+//        Player player = event.getPlayer();
+//
+//        // 检查玩家是否在操作铁砧UI
+//        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ANVIL) {
+//            String password = "";  // 从UI中获取玩家输入的密码（具体实现需要进一步补充）
+//
+//            // 处理密码验证
+//            if (api.isRegistered(player.getName())) {
+//                if (api.checkPassword(player.getName(), password)) {
+//                    player.sendMessage("登录成功！");
+//                } else {
+//                    player.sendMessage("密码错误，请重新尝试！");
+//                }
+//            } else {
+//                player.sendMessage("你还没有注册，请先注册！");
+//            }
+//        }
+//    }
 }
