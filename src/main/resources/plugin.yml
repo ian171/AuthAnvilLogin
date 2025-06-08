@@ -1,8 +1,10 @@
 name: AuthAnvilLogin
 version: '0.1-Beta1'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
-api-version: '1.21'
+api-version: '1.20'
 load: STARTUP
 authors: [ Chen ]
+depend:
+  - Authme
 description: Use anvil to login
 website: i.whocare.life
