@@ -1,7 +1,11 @@
 package net.chen.ll.authAnvilLogin;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import fr.xephi.authme.api.v3.AuthMeApi;
+import net.chen.ll.authAnvilLogin.commands.OpenAnvilLoginCommand;
 import net.wesjd.anvilgui.AnvilGUI;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -19,7 +23,7 @@ import java.util.logging.Logger;
 
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
-    public AuthMeApi api;
+    public static AuthMeApi api = AuthMeApi.getInstance();
     private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     public static int MAX_ATTEMPTS=3;
     public FileConfiguration config = getConfig();
@@ -27,7 +31,18 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         logger.info("AuthAnvilLogin enabled");
-        api = AuthMeApi.getInstance();
+        if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
+            api = AuthMeApi.getInstance();
+            if (api == null) {
+                getLogger().severe("AuthMe API 获取失败！");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+        } else {
+            getLogger().severe("AuthMe 插件未启用！");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
         try {
@@ -42,17 +57,14 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public void onDisable() {
         // Plugin shutdown logic
         logger.info("Plugin has disabled");
+        CommandAPI.onDisable();
         loginAttempts.clear();
-        api = null;
     }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
         // 如果玩家未登录，显示登录界面
-        if (!api.isAuthenticated(player)) {
             openAnvilUI(player);
-        }
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -64,14 +76,12 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         try {
             new AnvilGUI.Builder()
                     .title("请输入密码") // 设置UI标题
-                    .text("请输入你的密码") // 设置默认文本
                     .itemLeft(new ItemStack(Material.PAPER))  // 设置左侧物品
                     .plugin(this)// 插件实例
                     .onClickAsync((slot, stateSnapshot) -> {
-                        if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
+                        if (slot == AnvilGUI.Slot.INPUT_LEFT){
                             String input = stateSnapshot.getText(); // 获取玩家输入的文本
                             handleLogin(player, input);
-                            input=null;
                         }
                         if (slot == AnvilGUI.Slot.OUTPUT){
                             player.sendMessage("你点击了输出栏");
@@ -116,7 +126,6 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
                             if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
                                 String input = stateSnapshot.getText();
                                 handleRegistry(player, input);
-                                input=null;
                             }
                             return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
 

@@ -2,7 +2,7 @@ name: AuthAnvilLogin
 version: '0.1-Beta1'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
 api-version: '1.20'
-load: STARTUP
+load: POSTWORLD
 authors: [ Chen ]
 depend:
   - AuthMe
