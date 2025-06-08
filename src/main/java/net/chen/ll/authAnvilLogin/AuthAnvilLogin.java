@@ -1,24 +1,15 @@
 package net.chen.ll.authAnvilLogin;
 
-import fr.xephi.authme.AuthMe;
 import fr.xephi.authme.api.v3.AuthMeApi;
-import net.kyori.adventure.text.Component;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -28,7 +19,7 @@ import java.util.logging.Logger;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public AuthMeApi api;
-    private Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
+    private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     public static final int MAX_ATTEMPTS=3;
 
 
@@ -43,7 +34,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public void onDisable() {
         // Plugin shutdown logic
         logger.info("Plugin has disabled");
-        loginAttempts = null;
+        loginAttempts.clear();
         api = null;
     }
     @EventHandler
@@ -72,6 +63,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
                         if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
                             String input = stateSnapshot.getText(); // 获取玩家输入的文本
                             handleLogin(player, input);
+                            input=null;
                         }
                         if (slot == AnvilGUI.Slot.OUTPUT){
                             player.sendMessage("你点击了输出栏");
@@ -116,6 +108,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
                             if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
                                 String input = stateSnapshot.getText();
                                 handleRegistry(player, input);
+                                input=null;
                             }
                             return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
 
