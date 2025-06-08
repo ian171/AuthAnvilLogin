@@ -21,6 +21,24 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                                <mainClass>net.chen.ll.authAnvilLogin.AuthAnvilLogin</mainClass>
+                        </manifest>
+                    </archive>
+                    <includes>
+                        <include>plugin.yml</include>
+                        <include>config.yml</include>
+                        <include>net/wesjd/anvilgui/**</include>
+                        <include>net/chen/ll/authAnvilLogin/**</include>
+                    </includes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
@@ -41,7 +59,7 @@
                         <configuration>
                             <relocations>
                                 <relocation>
-                                    <pattern>net.wesjd.anvilgui</pattern>
+                                    <pattern>net.wesjd.anvilgui.*</pattern>
                                     <shadedPattern>net.chen.ll</shadedPattern> <!-- Replace [YOUR_PLUGIN_PACKAGE] with your namespace -->
                                 </relocation>
                             </relocations>

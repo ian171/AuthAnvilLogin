@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,14 +21,21 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public AuthMeApi api;
     private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
-    public static final int MAX_ATTEMPTS=3;
-
+    public static int MAX_ATTEMPTS=3;
+    public FileConfiguration config = getConfig();
 
     @Override
     public void onEnable() {
         logger.info("AuthAnvilLogin enabled");
         api = AuthMeApi.getInstance();
         getServer().getPluginManager().registerEvents(this, this);
+        saveDefaultConfig();
+        try {
+            MAX_ATTEMPTS = (int)config.get("max-attempts");
+        } catch (NullPointerException e) {
+            logger.warning("Failed to load max-attempts from config.yml, using default value: " + MAX_ATTEMPTS);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
