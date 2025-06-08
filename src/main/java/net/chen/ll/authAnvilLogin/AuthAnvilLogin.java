@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public AuthMeApi api;
-    private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
+    private Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     public static final int MAX_ATTEMPTS=3;
 
 
@@ -43,6 +43,8 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public void onDisable() {
         // Plugin shutdown logic
         logger.info("Plugin has disabled");
+        loginAttempts = null;
+        api = null;
     }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
