@@ -5,6 +5,6 @@ api-version: '1.20'
 load: STARTUP
 authors: [ Chen ]
 depend:
-  - Authme
+  - AuthMe
 description: Use anvil to login
 website: i.whocare.life
