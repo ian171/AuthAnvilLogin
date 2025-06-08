@@ -70,6 +70,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
                         // 处理点击事件
                         return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
                             // 完成时执行的代码
+                            logger.info(player.getName() + " Done");
 
                         })));
                     })
@@ -97,7 +98,36 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             }
         } else {
             player.sendMessage("你还没有注册，请先注册！");
+            try {
+                new AnvilGUI.Builder()
+                        .itemOutput(new ItemStack(Material.DIAMOND))
+                        .plugin(this)
+                        .itemLeft(new ItemStack(Material.PAPER))
+                        .onClickAsync((slot, stateSnapshot) -> {
+                            if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
+                                String input = stateSnapshot.getText();
+                                handleRegistry(player, input);
+                            }
+                            return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
+
+                            })));
+
+                        });
+            } catch (Exception e) {
+                logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
+                player.sendMessage("无法打开");
+            }
         }
+    }
+    public void handleRegistry(Player player, String password) {
+        if (api.isRegistered(player.getName())) {
+            player.sendMessage("你已经注册了！");
+            return;
+        }
+        else {
+            api.registerPlayer(player.getName(), password);
+        }
+        player.sendMessage("注册成功！");
     }
 //    @EventHandler
 //    public void onInventoryClick(PlayerInteractEvent event) {
