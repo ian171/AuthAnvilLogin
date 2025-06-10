@@ -111,6 +111,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
         if (api.isRegistered(player.getName())) {
             if (api.checkPassword(player.getName(), password)) {
+                player.performCommand("l "+password);
                 player.sendMessage("登录成功！");
             } else {
                 player.sendMessage("密码错误，请重新输入！");
@@ -145,6 +146,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
         else {
             api.registerPlayer(player.getName(), password);
+            handleLogin(player, password);
         }
         player.sendMessage("注册成功！");
     }
