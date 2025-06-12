@@ -50,6 +50,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             return;
         }
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
 //
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         saveDefaultConfig();
