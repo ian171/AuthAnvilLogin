@@ -1,18 +1,12 @@
 package net.chen.ll.authAnvilLogin;
 
 import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPIBukkitConfig;
-import fr.xephi.authme.AuthMe;
 import fr.xephi.authme.api.v3.AuthMeApi;
-import fr.xephi.authme.data.auth.PlayerAuth;
-import fr.xephi.authme.process.login.AsynchronousLogin;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
-import net.chen.ll.authAnvilLogin.commands.OpenAnvilLoginCommand;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
