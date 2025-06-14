@@ -6,18 +6,19 @@ This is a plugin for Minecraft server, which can be used to login with AnvilGui
 
 ## 功能特性
 
-铁砧登录界面：AuthAnvilLogin 利用铁砧界面让玩家输入密码进行登录，这一设计不仅新颖，而且能够提供更好的用户体验。
+- 铁砧登录界面：AuthAnvilLogin 利用铁砧界面让玩家输入密码进行登录，这一设计不仅新颖，而且能够提供更好的用户体验。
 
-密码安全性：插件支持多种密码策略，包括检查密码是否包含大写字母、是否满足最短密码要求以及是否满足最长密码要求。
+- 密码安全性：插件支持多种密码策略，包括检查密码是否包含大写字母、是否满足最短密码要求以及是否满足最长密码要求。
 
-配置灵活：通过 config.yml 文件，管理员可以轻松配置登录尝试的最大次数、密码策略等设置，以满足不同服务器的需求。
+- 配置灵活：通过 config.yml 文件，管理员可以轻松配置登录尝试的最大次数、密码策略等设置，以满足不同服务器的需求。
 Config实例：
-`max-attempts: 3
+```
+max-attempts: 3
 config:
     isRequestUpper: true
     checkLowestPassword: true
     checkLongestPassword: true
-`
+```
 
 权限控制：插件提供了详细的权限控制，确保只有拥有相应权限的玩家才能使用特定的命令和功能。
 
