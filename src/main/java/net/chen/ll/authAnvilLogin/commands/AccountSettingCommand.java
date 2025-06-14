@@ -14,9 +14,11 @@ public class AccountSettingCommand implements CommandExecutor {
     }
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        if(strings[0].equals("reload")){
-            ConfigLoader.loadConfig();
-            return true;
+        if (strings.length != 0) {
+            if(strings[0].equals("reload")){
+                ConfigLoader.loadConfig();
+                return true;
+            }
         }
         if (commandSender instanceof Player) {
             AccountManagerGui.open((Player) commandSender);
