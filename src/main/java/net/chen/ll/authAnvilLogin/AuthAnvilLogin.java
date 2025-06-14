@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin;
 import dev.jorel.commandapi.CommandAPI;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
+import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -58,24 +59,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
         saveDefaultConfig();
-        loadConfig();
-    }
-    public void loadConfig(){
-        boolean isConfigValid = true;
-        try {
-            MAX_ATTEMPTS = (int)config.get("max-attempts");
-            isRequestUpper = (boolean) config.get("config.isRequestUpper");
-            checkLowestPassword = (boolean) config.get("config.checkLowestPassword");
-            checkLongestPassword = (boolean) config.get("config.checkLongestPassword");
-        } catch (NullPointerException e) {
-            logger.warning("配置文件读取失败，使用默认值");
-            isConfigValid = false;
-        }finally {
-            logger.info("配置文件读取完成");
-            if (isConfigValid) {
-                logger.info("配置文件读取成功");
-            }
-        }
+        ConfigLoader.loadConfig();
     }
 
     @Override
