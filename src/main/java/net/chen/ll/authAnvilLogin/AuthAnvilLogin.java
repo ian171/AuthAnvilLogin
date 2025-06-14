@@ -26,6 +26,9 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public static AuthMeApi api = AuthMeApi.getInstance();
     private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     public static int MAX_ATTEMPTS=3;
+    public static boolean isRequestUpper = true;
+    public static boolean checkLowestPassword = true;
+    public static boolean checkLongestPassword = true;
     public FileConfiguration config = getConfig();
 
     @Override
@@ -48,11 +51,20 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
 //
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         saveDefaultConfig();
+        boolean isConfigValid = true;
         try {
             MAX_ATTEMPTS = (int)config.get("max-attempts");
+            isRequestUpper = (boolean) config.get("config.isRequestUpper");
+            checkLowestPassword = (boolean) config.get("config.checkLowestPassword");
+            checkLongestPassword = (boolean) config.get("config.checkLongestPassword");
         } catch (NullPointerException e) {
-            logger.warning("Failed to load max-attempts from config.yml, using default value: " + MAX_ATTEMPTS);
-            MAX_ATTEMPTS = 3;
+            logger.warning("配置文件读取失败，使用默认值");
+            isConfigValid = false;
+        }finally {
+            logger.info("配置文件读取完成");
+            if (isConfigValid) {
+                logger.info("配置文件读取成功");
+            }
         }
     }
 
@@ -67,7 +79,13 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         // 如果玩家未登录，显示登录界面
+        if (api.isRegistered(player.getName())) {
             openAnvilUI(player);
+        }else {
+            player.sendMessage("检测到你是第一次来服务器,", "请先注册账号");
+            logger.info(player.getName()+" is new with "+player.getClientBrandName());
+            openRegisterUI(player);
+        }
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -79,19 +97,22 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         try {
             new AnvilGUI.Builder()
                     .title("请输入密码")
-                    .text("Here")// 设置UI标题
-                    .itemLeft(new ItemStack(Material.PAPER))  // 设置左侧物品
+                    .text("")
+                    .itemLeft(new ItemStack(Material.PAPER))
+                    .itemRight(new ItemStack(Material.REDSTONE))// 设置左侧物品
                     .plugin(this)// 插件实例
                     .onClickAsync((slot, stateSnapshot) -> {
-                        if (slot == AnvilGUI.Slot.INPUT_LEFT){
-                            String input = stateSnapshot.getText(); // 获取玩家输入的文本
+                        if (slot == AnvilGUI.Slot.OUTPUT){
+                            String input = stateSnapshot.getText();// 获取玩家输入的文本
                             handleLogin(player, input);
+                        }
+                        if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
+                            openRegisterUI(player);
                         }
                         // 处理点击事件
                         return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
                             // 完成时执行的代码
                             logger.info(player.getName() + " Done");
-
                         })));
                     })
                     .itemOutput(new ItemStack(Material.DIAMOND)) // 设置输出物品
@@ -124,15 +145,16 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
     }
     public void openRegisterUI(Player player) {
+        player.closeInventory();
         try {
             new AnvilGUI.Builder()
                     .title("注册")
-                    .text("Here")
+                    .text("")
                     .itemOutput(new ItemStack(Material.DIAMOND))
                     .plugin(this)
                     .itemLeft(new ItemStack(Material.PAPER))
                     .onClickAsync((slot, stateSnapshot) -> {
-                        if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
+                        if (slot == AnvilGUI.Slot.OUTPUT) {
                             String input = stateSnapshot.getText();
                             handleRegistry(player, input);
                         }
@@ -149,14 +171,54 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public void handleRegistry(Player player, String password) {
         if (api.isRegistered(player.getName())) {
             player.sendMessage("你已经注册了！");
-            return;
+            player.closeInventory();
         }
         else {
-            api.registerPlayer(player.getName(), password);
-            handleLogin(player, password);
+            if (password == null || password.isEmpty()) {
+                player.sendMessage("输入不能为空！");
+                openRegisterUI(player);
+                return;
+            }
+            if (password.length() < 6) {
+                if (checkLowestPassword) {
+                    player.sendMessage("密码长度不能小于6位！");
+                    openRegisterUI(player);
+                    return;
+                }
+            }
+            if (password.length() > 16) {
+                if (checkLongestPassword) {
+                    player.sendMessage("密码长度不能大于16位！");
+                    openRegisterUI(player);
+                    return;
+                }
+            }
+            if (password.contains(" ")) {
+                player.sendMessage("密码不能包含空格！");
+                openRegisterUI(player);
+                return;
+            }
+            if (!isContainUpper(password)) {
+                if (isRequestUpper) {
+                    player.sendMessage("密码未包含大写字母");
+                    openRegisterUI(player);
+                    return;
+                }
+            }
+            api.forceRegister(player, password);
+            api.forceLogin(player);
+            player.sendMessage("注册成功😀！");
+            player.sendMessage("你的密码是:"+password);
+            player.closeInventory();
         }
-        player.sendMessage("注册成功！");
-        player.closeInventory();
+    }
+    public static boolean isContainUpper(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            if (Character.isUpperCase(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 //    @EventHandler
 //    public void onInventoryClick(PlayerInteractEvent event) {

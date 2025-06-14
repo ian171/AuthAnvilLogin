@@ -1,1 +1,6 @@
 max-attempts: 3
+config:
+  isRequestUpper: true
+  checkLowestPassword: true
+  checkLongestPassword: true
+
