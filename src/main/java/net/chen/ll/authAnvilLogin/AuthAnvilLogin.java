@@ -35,7 +35,6 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public static boolean isRequestUpper = true;
     public static boolean checkLowestPassword = true;
     public static boolean checkLongestPassword = true;
-    public FileConfiguration config = getConfig();
 
     @Override
     public void onEnable() {
