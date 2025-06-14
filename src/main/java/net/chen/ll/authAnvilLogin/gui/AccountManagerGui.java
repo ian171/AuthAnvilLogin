@@ -1,5 +1,7 @@
 package net.chen.ll.authAnvilLogin.gui;
 
+import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -25,13 +27,18 @@ public class AccountManagerGui implements Listener {
         player.openInventory(inventory);
     }
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        Player p = (Player) event.getWhoClicked();
+    public void onInventoryClick(InventoryClickEvent event){
         if (event.getInventory() == inv) {
+            Player p = (Player) event.getWhoClicked();
+            event.setCancelled(true);
             if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.REDSTONE)) {
-                p.performCommand("logout");
+                AuthAnvilLogin.api.forceLogout(p);
+                p.closeInventory();
+                p.kick(Component.text("已注销登录"));
             }else if(event.getCurrentItem().getType().equals(Material.IRON_INGOT)){
-                p.performCommand("unregister");
+                AuthAnvilLogin.api.forceUnregister(p);
+                p.closeInventory();
+                p.kick(Component.text("账户已删除"));
             }
         }
     }
