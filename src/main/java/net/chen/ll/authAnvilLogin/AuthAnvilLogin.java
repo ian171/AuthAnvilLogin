@@ -7,6 +7,8 @@ import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,6 +17,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -24,6 +28,7 @@ import java.util.logging.Logger;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public static AuthMeApi api = AuthMeApi.getInstance();
+    private final String[] subCommands = {"reload","list"};
     private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     public static int MAX_ATTEMPTS=3;
     public static boolean isRequestUpper = true;
@@ -48,9 +53,14 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
+
 //
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
+        this.getCommand("anvillogin").setTabCompleter(this);
         saveDefaultConfig();
+        loadConfig();
+    }
+    public void loadConfig(){
         boolean isConfigValid = true;
         try {
             MAX_ATTEMPTS = (int)config.get("max-attempts");
@@ -66,6 +76,13 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
                 logger.info("配置文件读取成功");
             }
         }
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (args.length > 1) return new ArrayList<>();
+        if (args.length == 0) return Arrays.asList(subCommands);
+        return Arrays.stream(subCommands).filter(s -> s.startsWith(args[0])).toList();
     }
 
     @Override

@@ -15,4 +15,5 @@ commands:
     aliases:
       - al
       - avl
+    permission-message: &cYou don't have permission to use this command!
 
