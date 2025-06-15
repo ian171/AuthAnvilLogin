@@ -10,6 +10,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
+
 import static net.chen.ll.authAnvilLogin.AuthAnvilLogin.api;
 
 public class AccountSettingCommand implements CommandExecutor {
@@ -28,11 +30,8 @@ public class AccountSettingCommand implements CommandExecutor {
                 commandSender.sendMessage("§7在线人数: §a" + Bukkit.getOnlinePlayers().size());
 
                 for (Player p : Bukkit.getOnlinePlayers()) {
-
-                    // ★ 判断：是否“正版 / 已自动登录”
                     boolean premium = api.isAuthenticated(p);
-
-                    String coloredName = (premium ? ChatColor.GREEN : ChatColor.YELLOW) + p.getName();
+                    String coloredName = (premium ? new Color(0,255,0) : new Color(57, 221, 14)) + p.getName();
                     commandSender.sendMessage(coloredName);
                 }
                 commandSender.sendMessage("§7--------------------------------");

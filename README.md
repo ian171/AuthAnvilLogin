@@ -26,6 +26,10 @@ config:
 
 通过以上功能特性，AuthAnvilLogin 插件为 Minecraft 服务器提供了一个安全、灵活且用户友好的登录解决方案。
 
+## 命令
+- /al reload 重新加载配置文件
+- /al list 列出所有在线玩家及其登录状态
+
 ## Special:
 
 Supported by [LegacyLand](https://github.com/LegacyLands/)
