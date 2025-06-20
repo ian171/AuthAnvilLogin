@@ -1,39 +1,29 @@
 package net.chen.ll.authAnvilLogin;
 
-import dev.jorel.commandapi.CommandAPI;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
+import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
-import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
+
+import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public static AuthMeApi api = AuthMeApi.getInstance();
-    public static int MAX_ATTEMPTS=3;
-    public static boolean isRequestUpper = true;
-    public static boolean checkLowestPassword = true;
-    public static boolean checkLongestPassword = true;
 
     @Override
     public void onEnable() {
@@ -58,6 +48,19 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         this.getCommand("anvillogin").setTabCompleter(this);
         saveDefaultConfig();
         ConfigLoader.loadConfig();
+    }
+    @Override
+    public void onDisable() {
+        logger.info("AuthAnvilLogin disabled");
+        Handler.api = null;
+        logger = null;
+        Handler.loginAttempts.clear();
+    }
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (args.length > 1) return new ArrayList<>();
+        if (args.length == 0) return Arrays.asList(subCommands);
+        return Arrays.stream(subCommands).filter(s -> s.startsWith(args[0])).toList();
     }
 
 

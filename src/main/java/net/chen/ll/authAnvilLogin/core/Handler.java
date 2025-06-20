@@ -22,10 +22,10 @@ import static net.chen.ll.authAnvilLogin.core.Config.*;
 import static org.bukkit.Bukkit.getLogger;
 
 public class Handler implements Listener {
-    public Logger logger= getLogger();
-    public static AuthMeApi api = AuthMeApi.getInstance();
-    private final String[] subCommands = {"reload","list"};
-    private final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
+    public Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
+    public static AuthMeApi api = AuthAnvilLogin.api;
+    public static final String[] subCommands = {"reload","list"};
+    public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
