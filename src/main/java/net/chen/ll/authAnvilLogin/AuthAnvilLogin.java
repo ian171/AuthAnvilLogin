@@ -57,7 +57,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         Handler.loginAttempts.clear();
     }
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+    public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length > 1) return new ArrayList<>();
         if (args.length == 0) return Arrays.asList(subCommands);
         return Arrays.stream(subCommands).filter(s -> s.startsWith(args[0])).toList();
