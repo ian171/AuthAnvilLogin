@@ -31,11 +31,11 @@ public class AccountSettingCommand implements CommandExecutor {
 
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     boolean premium = api.isAuthenticated(p);
-                    String coloredName = (premium ? new Color(0,255,0) : new Color(57, 221, 14)) + p.getName();
+                    String coloredName = (premium ? ChatColor.GREEN : ChatColor.YELLOW) + p.getName();
                     commandSender.sendMessage(coloredName);
                 }
                 commandSender.sendMessage("§7--------------------------------");
-
+                return true;
             }
         }
         if (commandSender instanceof Player) {
