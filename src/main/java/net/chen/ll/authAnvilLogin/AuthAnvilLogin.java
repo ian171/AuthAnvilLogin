@@ -3,7 +3,6 @@ package net.chen.ll.authAnvilLogin;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
-import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import org.bukkit.Bukkit;
@@ -12,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,10 +22,12 @@ import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public static AuthMeApi api = AuthMeApi.getInstance();
+    //public static ProtocolManager protocolManager;
 
     @Override
     public void onEnable() {
         logger.info("AuthAnvilLogin enabled");
+        //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
             api = AuthMeApi.getInstance();
             if (api == null) {

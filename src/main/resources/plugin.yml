@@ -6,6 +6,7 @@ load: POSTWORLD
 authors: [ Chen ]
 depend:
   - AuthMe
+  - ProtocolLib
 description: Use anvil to login
 website: i.whocare.life
 commands:

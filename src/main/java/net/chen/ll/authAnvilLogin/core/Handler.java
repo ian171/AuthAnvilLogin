@@ -13,13 +13,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Config.*;
-import static org.bukkit.Bukkit.getLogger;
 
 public class Handler implements Listener {
     public Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
@@ -29,6 +29,10 @@ public class Handler implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        if(Objects.requireNonNull(player.getClientBrandName()).contains("Geyser")) {
+            api.forceLogin(player);
+            return;
+        }
         // 如果玩家未登录，显示登录界面
         if (api.isRegistered(player.getName())) {
             openAnvilUI(player);

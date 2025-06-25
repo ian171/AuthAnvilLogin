@@ -1,6 +1,5 @@
 package net.chen.ll.authAnvilLogin.commands;
 
-import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,8 +8,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.awt.*;
 
 import static net.chen.ll.authAnvilLogin.AuthAnvilLogin.api;
 

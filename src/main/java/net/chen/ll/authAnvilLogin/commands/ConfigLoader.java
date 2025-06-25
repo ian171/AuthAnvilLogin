@@ -1,9 +1,10 @@
 package net.chen.ll.authAnvilLogin.commands;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
-import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 import java.util.logging.Logger;
+
+import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class ConfigLoader {
     public static Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
