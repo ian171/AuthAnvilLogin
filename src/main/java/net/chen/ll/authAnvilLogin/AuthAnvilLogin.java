@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
+import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import org.bukkit.Bukkit;
@@ -35,6 +36,12 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             System.gc();
             return;
         }
+        saveDefaultConfig();
+        ConfigLoader.loadConfig();
+        if(Config.getVer() <= 0){
+            getLogger().severe("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
+            throw new NumberFormatException("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
+        }
         logger.info("AuthAnvilLogin enabled");
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
@@ -49,14 +56,11 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
         getServer().getPluginManager().registerEvents( new Handler(), this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
-
-//
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
-        saveDefaultConfig();
-        ConfigLoader.loadConfig();
     }
     @Override
     public void onDisable() {

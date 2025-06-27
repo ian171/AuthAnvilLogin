@@ -31,11 +31,18 @@ public class Handler implements Listener {
         Player player = event.getPlayer();
         if(Objects.requireNonNull(player.getClientBrandName()).contains("Geyser")) {
             api.forceLogin(player);
+            if (isDebug){
+                logger.info(player.getName()+" is Geyser Client");
+                logger.info("Last IP:"+api.getLastIp(player.getName()));
+            }
             return;
         }
         // 如果玩家未登录，显示登录界面
         if (api.isRegistered(player.getName())) {
             openAnvilUI(player);
+            if (isDebug){
+                logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
+            }
         }else {
             player.sendMessage("检测到你是第一次来服务器,", "请先注册账号");
             logger.info(player.getName()+" is new with "+player.getClientBrandName());

@@ -1,4 +1,6 @@
+ver: 1
 max-attempts: 3
+debug: false
 config:
   isRequestUpper: true
   checkLowestPassword: true
