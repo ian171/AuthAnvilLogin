@@ -18,6 +18,10 @@ public class AccountSettingCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         if (strings.length != 0) {
+            if(!commandSender.isOp()) {
+                commandSender.sendMessage("§c你没有权限执行此命令！");
+                return true;
+            }
             if(strings[0].equals("reload")){
                 ConfigLoader.loadConfig();
                 return true;

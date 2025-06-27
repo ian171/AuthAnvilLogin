@@ -24,8 +24,17 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public static AuthMeApi api = AuthMeApi.getInstance();
     //public static ProtocolManager protocolManager;
 
+    private String getJava(){
+        return System.getProperty("java.version");
+    }
     @Override
     public void onEnable() {
+        if (getJava().startsWith("1.8")) {
+            getLogger().severe("AuthAnvilLogin 不支持 Java 1.8，请使用 Java 1.9 或更高版本。");
+            getServer().getPluginManager().disablePlugin(this);
+            System.gc();
+            return;
+        }
         logger.info("AuthAnvilLogin enabled");
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
