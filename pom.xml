@@ -6,7 +6,7 @@
 
     <groupId>net.chen.ll</groupId>
     <artifactId>authanvillogin</artifactId>
-    <version>1.2-Beta1</version>
+    <version>1.2-Beta2</version>
     <packaging>jar</packaging>
 
     <name>authanvillogin</name>
