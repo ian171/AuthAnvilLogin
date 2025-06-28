@@ -7,6 +7,7 @@ public final class Config {
     public static boolean checkLongestPassword = true;
     public static boolean isDebug = false;
     private static int ver;
+    public static boolean isGeyserLoaded = false;
     public static int getVer() {
         if (ver != 0){
             return ver;

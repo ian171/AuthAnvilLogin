@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin.core;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.wesjd.anvilgui.AnvilGUI;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,6 +11,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.geysermc.api.Geyser;
+import org.geysermc.api.GeyserApiBase;
+import org.geysermc.cumulus.form.CustomForm;
+import org.geysermc.cumulus.form.Form;
+import org.geysermc.cumulus.form.ModalForm;
+import org.geysermc.cumulus.form.util.FormBuilder;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -26,17 +34,52 @@ public class Handler implements Listener {
     public static AuthMeApi api = AuthAnvilLogin.api;
     public static final String[] subCommands = {"reload","list"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
+    private String randomPasswordGen(int seed){
+        double seed2 = (seed * Math.cos(seed)+Math.tan(Math.abs(seed - 0.1)));
+        return String.valueOf(Math.abs((Math.random()*seed2)));
+    }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if(Objects.requireNonNull(player.getClientBrandName()).contains("Geyser")) {
-            api.forceLogin(player);
-            if (isDebug){
-                logger.info(player.getName()+" is Geyser Client");
-                logger.info("Last IP:"+api.getLastIp(player.getName()));
+//        if(AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())) {
+//            api.forceLogin(player);
+//            if (isDebug){
+//                logger.info(player.getName()+" is Geyser Client");
+//                logger.info("Last IP:"+api.getLastIp(player.getName()));
+//            }
+//            return;
+//        }
+        if (isGeyserLoaded){
+            if (AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())) {
+                    ModalForm.builder().title("Bedrock login")
+                            .content("你正在使用Geyser客户端,选择你要的操作")
+                            .button1("Login")
+                            .button2("Register")
+                            .closedOrInvalidResultHandler(()->{
+                                player.sendMessage("你选择了取消操作");
+                            }).validResultHandler(buttonId -> {
+                                if (buttonId.clickedButtonId() == 1){
+                                    CustomForm.builder().title("Login")
+                                            .input("密码","Password")
+                                            .validResultHandler(formResponse -> {
+                                                api.forceLogin(player);
+                                            });
+                                }
+                                if (buttonId.clickedButtonId() == 2){
+                                    String password = randomPasswordGen(player.getUniqueId().hashCode());
+                                    api.forceRegister(player,password);
+                                    player.sendMessage("注册成功,密码为:"+password);
+                                    player.sendMessage("请及时修改你的密码");
+                                }
+                            });
+                    return;
             }
-            return;
+        }else {
+            if (isDebug){
+                logger.info("Geyser is not loaded");
+            }
         }
+
         // 如果玩家未登录，显示登录界面
         if (api.isRegistered(player.getName())) {
             openAnvilUI(player);
@@ -85,6 +128,13 @@ public class Handler implements Listener {
         }
         // 打开UI
     }
+    private boolean isGeyserPlayer(Player player) {
+        if (isGeyserLoaded) {
+            return AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId());
+        }
+        return false;
+    }
+
     private void handleLogin(Player player, String password) {
         UUID playerUUID = player.getUniqueId();
         int attempts = loginAttempts.getOrDefault(playerUUID, 0);

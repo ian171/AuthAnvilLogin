@@ -11,7 +11,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.geysermc.api.Geyser;
+import org.geysermc.api.GeyserApiBase;
 import org.jetbrains.annotations.NotNull;
+import org.geysermc.floodgate.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +26,7 @@ import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public static AuthMeApi api = AuthMeApi.getInstance();
+    public static GeyserApiBase geyserApiBase;
     //public static ProtocolManager protocolManager;
 
     private String getJava(){
@@ -43,6 +47,13 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             throw new NumberFormatException("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
         }
         logger.info("AuthAnvilLogin enabled");
+
+        if (Bukkit.getPluginManager().isPluginEnabled("Geyser-Spigot")) {
+            geyserApiBase = Geyser.api();
+            Config.isGeyserLoaded = true;
+        }else {
+            logger.warning("You seem not to enable Geyser");
+        }
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
             api = AuthMeApi.getInstance();
