@@ -84,7 +84,7 @@ public class Handler implements Listener {
             }
         }
         //临时代替方案
-        if(AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())){
+        if(player.getClientBrandName().contains("Geyser")){
             api.forceLogin(player);
             return;
         }
