@@ -13,12 +13,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.geysermc.api.Geyser;
 import org.geysermc.api.GeyserApiBase;
+import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.InstanceHolder;
 import org.jetbrains.annotations.NotNull;
-import org.geysermc.floodgate.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
@@ -27,6 +29,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger= getLogger();
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static GeyserApiBase geyserApiBase;
+    public static FloodgateApi floodgateApi;
     //public static ProtocolManager protocolManager;
 
     private String getJava(){
@@ -48,11 +51,14 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
         logger.info("AuthAnvilLogin enabled");
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Geyser-Spigot")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("Geyser-Spigot")&&Bukkit.getPluginManager().isPluginEnabled("Floodgate")) {
             geyserApiBase = Geyser.api();
+            floodgateApi = InstanceHolder.getApi();
             Config.isGeyserLoaded = true;
+            logger.info("Geyser and Floodgate loaded");
+            Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("Geyser-Spigot")).getLogger().info("AuthAnvilLogin loaded");
         }else {
-            logger.warning("You seem not to enable Geyser");
+            logger.warning("You seem not to enable Geyser or Floodgate");
         }
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {

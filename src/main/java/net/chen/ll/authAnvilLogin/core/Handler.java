@@ -51,27 +51,31 @@ public class Handler implements Listener {
 //        }
         if (isGeyserLoaded){
             if (AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())) {
-                    ModalForm.builder().title("Bedrock login")
-                            .content("你正在使用Geyser客户端,选择你要的操作")
-                            .button1("Login")
-                            .button2("Register")
-                            .closedOrInvalidResultHandler(()->{
-                                player.sendMessage("你选择了取消操作");
-                            }).validResultHandler(buttonId -> {
-                                if (buttonId.clickedButtonId() == 1){
-                                    CustomForm.builder().title("Login")
-                                            .input("密码","Password")
-                                            .validResultHandler(formResponse -> {
-                                                api.forceLogin(player);
-                                            });
-                                }
-                                if (buttonId.clickedButtonId() == 2){
-                                    String password = randomPasswordGen(player.getUniqueId().hashCode());
-                                    api.forceRegister(player,password);
-                                    player.sendMessage("注册成功,密码为:"+password);
-                                    player.sendMessage("请及时修改你的密码");
-                                }
-                            });
+                CustomForm.Builder c =CustomForm.builder().title("Login")
+                        .input("密码","Password")
+                        .validResultHandler(formResponse -> api.forceLogin(player));
+                logger.info("Registered c");
+                ModalForm.Builder m =ModalForm.builder().title("Bedrock login")
+                        .content("你正在使用Geyser客户端,选择你要的操作")
+                        .button1("Login")
+                        .button2("Register")
+                        .closedOrInvalidResultHandler(()->{
+                            player.sendMessage("你选择了取消操作");
+                        }).validResultHandler(buttonId -> {
+                            if (buttonId.clickedButtonText().equals("Login")){
+                                AuthAnvilLogin.floodgateApi.sendForm(player.getUniqueId(),c);
+                            }
+                            if (buttonId.clickedButtonId() == 2){
+                                String password = randomPasswordGen(player.getUniqueId().hashCode());
+                                api.forceRegister(player,password);
+                                player.sendMessage("注册成功,密码为:"+password);
+                                player.sendMessage("请及时修改你的密码");
+                            }
+                        });
+                    logger.info("m");
+                    AuthAnvilLogin.floodgateApi.getPlayer(player.getUniqueId()).sendForm(m);
+                    logger.info("exec m");
+                    player.sendMessage("Logging");
                     return;
             }
         }else {
