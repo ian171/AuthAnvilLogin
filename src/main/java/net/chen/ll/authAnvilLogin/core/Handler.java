@@ -49,12 +49,16 @@ public class Handler implements Listener {
 //            }
 //            return;
 //        }
+        /*
+          Geyser客户端登录
+          无法运行
+         */
         if (isGeyserLoaded){
+            if(!isDebug) return;//功能存在问题，下部分代码暂不启用
             if (AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())) {
                 CustomForm.Builder c =CustomForm.builder().title("Login")
                         .input("密码","Password")
                         .validResultHandler(formResponse -> api.forceLogin(player));
-                logger.info("Registered c");
                 ModalForm.Builder m =ModalForm.builder().title("Bedrock login")
                         .content("你正在使用Geyser客户端,选择你要的操作")
                         .button1("Login")
@@ -72,16 +76,17 @@ public class Handler implements Listener {
                                 player.sendMessage("请及时修改你的密码");
                             }
                         });
-                    logger.info("m");
                     AuthAnvilLogin.floodgateApi.getPlayer(player.getUniqueId()).sendForm(m);
-                    logger.info("exec m");
-                    player.sendMessage("Logging");
-                    return;
             }
         }else {
             if (isDebug){
                 logger.info("Geyser is not loaded");
             }
+        }
+        //临时代替方案
+        if(AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())){
+            api.forceLogin(player);
+            return;
         }
 
         // 如果玩家未登录，显示登录界面
