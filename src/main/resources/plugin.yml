@@ -1,5 +1,5 @@
 name: AuthAnvilLogin
-version: '1.2-Beta3'
+version: '1.2-Stable'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
 api-version: '1.13'
 load: POSTWORLD

@@ -2,6 +2,8 @@ package net.chen.ll.authAnvilLogin.commands;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.Configuration;
 
 import java.util.logging.Logger;
@@ -12,9 +14,7 @@ public class ConfigLoader {
     public static Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
     private static Configuration config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
     public static void loadConfig() {
-        if (config == null) {
-            config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
-        }
+        config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
         boolean isConfigValid = true;
         try {
             MAX_ATTEMPTS = config.getInt("max-attempts");
@@ -27,11 +27,15 @@ public class ConfigLoader {
             logger.warning("配置文件读取失败，使用默认值");
             isConfigValid = false;
         }finally {
-            logger.info("配置文件读取完成");
             if (isConfigValid) {
                 logger.info("配置文件读取成功");
             }
             logger.info("Config Version:"+ Config.getVer());
+            if (isDebug){
+                for (String key : config.getKeys(false)) {
+                    Bukkit.getServer().sendMessage(Component.empty().content(key + ":" + config.get(key)));
+                }
+            }
         }
     }
 }
