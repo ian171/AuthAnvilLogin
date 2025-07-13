@@ -5,4 +5,12 @@ config:
   isRequestUpper: true
   checkLowestPassword: true
   checkLongestPassword: true
-
+materials:
+  login:
+    left: "PAPER"
+    right: "REDSTONE"
+    output: "ARROW"
+  register:
+    left: "DIAMOND"
+    right: "IRON_INGOT"
+    output: "ARROW"

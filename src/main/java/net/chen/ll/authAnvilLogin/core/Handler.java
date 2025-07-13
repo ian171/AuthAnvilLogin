@@ -3,7 +3,6 @@ package net.chen.ll.authAnvilLogin.core;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,17 +10,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.geysermc.api.Geyser;
-import org.geysermc.api.GeyserApiBase;
 import org.geysermc.cumulus.form.CustomForm;
-import org.geysermc.cumulus.form.Form;
 import org.geysermc.cumulus.form.ModalForm;
-import org.geysermc.cumulus.form.util.FormBuilder;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,43 +46,17 @@ public class Handler implements Listener {
           Geyser客户端登录
           无法运行
          */
-        if (isGeyserLoaded){
-            if(!isDebug) return;//功能存在问题，下部分代码暂不启用
-            if (AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())) {
-                CustomForm.Builder c =CustomForm.builder().title("Login")
-                        .input("密码","Password")
-                        .validResultHandler(formResponse -> api.forceLogin(player));
-                ModalForm.Builder m =ModalForm.builder().title("Bedrock login")
-                        .content("你正在使用Geyser客户端,选择你要的操作")
-                        .button1("Login")
-                        .button2("Register")
-                        .closedOrInvalidResultHandler(()->{
-                            player.sendMessage("你选择了取消操作");
-                        }).validResultHandler(buttonId -> {
-                            if (buttonId.clickedButtonText().equals("Login")){
-                                AuthAnvilLogin.floodgateApi.sendForm(player.getUniqueId(),c);
-                            }
-                            if (buttonId.clickedButtonId() == 2){
-                                String password = randomPasswordGen(player.getUniqueId().hashCode());
-                                api.forceRegister(player,password);
-                                player.sendMessage("注册成功,密码为:"+password);
-                                player.sendMessage("请及时修改你的密码");
-                            }
-                        });
-                    AuthAnvilLogin.floodgateApi.getPlayer(player.getUniqueId()).sendForm(m);
-            }
-        }else {
-            if (isDebug){
-                logger.info("Geyser is not loaded");
-            }
-        }
         //临时代替方案
-        if(player.getClientBrandName().contains("Geyser")){
-            api.forceLogin(player);
-            return;
+        // try为了防止在低版本上出现问题
+        try {
+            if(player.getClientBrandName().contains("Geyser")){
+                api.forceLogin(player);
+                return;
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
 
-        // 如果玩家未登录，显示登录界面
         if (api.isRegistered(player.getName())) {
             openAnvilUI(player);
             if (isDebug){
@@ -112,8 +79,8 @@ public class Handler implements Listener {
             new AnvilGUI.Builder()
                     .title("请输入密码")
                     .text("")
-                    .itemLeft(new ItemStack(Material.PAPER))
-                    .itemRight(new ItemStack(Material.REDSTONE))// 设置左侧物品
+                    .itemLeft(new ItemStack(Config.getItemsListMap().get("login.left")))
+                    .itemRight(new ItemStack(Config.getItemsListMap().get("login.right")))
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))// 插件实例
                     .onClickAsync((slot, stateSnapshot) -> {
                         if (slot == AnvilGUI.Slot.OUTPUT){
@@ -129,7 +96,7 @@ public class Handler implements Listener {
                             logger.info(player.getName() + " Done");
                         })));
                     })
-                    .itemOutput(new ItemStack(Material.DIAMOND)) // 设置输出物品
+                    .itemOutput(new ItemStack(Config.getItemsListMap().get("login.output"))) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
             logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
@@ -171,9 +138,10 @@ public class Handler implements Listener {
             new AnvilGUI.Builder()
                     .title("注册")
                     .text("")
-                    .itemOutput(new ItemStack(Material.DIAMOND))
+                    .itemOutput(new ItemStack(Config.getItemsListMap().get("register.output")))
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))
-                    .itemLeft(new ItemStack(Material.PAPER))
+                    .itemLeft(new ItemStack(Config.getItemsListMap().get("register.left")))
+                    .itemRight(new ItemStack(Config.getItemsListMap().get("register.right")))
                     .onClickAsync((slot, stateSnapshot) -> {
                         if (slot == AnvilGUI.Slot.OUTPUT) {
                             String input = stateSnapshot.getText();

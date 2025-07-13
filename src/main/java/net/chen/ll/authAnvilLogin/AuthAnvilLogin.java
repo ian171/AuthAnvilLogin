@@ -11,55 +11,37 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.api.Geyser;
 import org.geysermc.api.GeyserApiBase;
 import org.geysermc.floodgate.api.FloodgateApi;
-import org.geysermc.floodgate.api.InstanceHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
-    public Logger logger= getLogger();
+    public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static GeyserApiBase geyserApiBase;
     public static FloodgateApi floodgateApi;
-    //public static ProtocolManager protocolManager;
 
-    private String getJava(){
-        return System.getProperty("java.version");
-    }
+    //public static ProtocolManager protocolManager;
     @Override
     public void onEnable() {
-        if (getJava().startsWith("1.8")) {
-            getLogger().severe("AuthAnvilLogin 不支持 Java 1.8，请使用 Java 1.9 或更高版本。");
-            getServer().getPluginManager().disablePlugin(this);
-            System.gc();
-            return;
-        }
         saveDefaultConfig();
         ConfigLoader.loadConfig();
+
         if(Config.getVer() <= 0){
             getLogger().severe("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
             throw new NumberFormatException("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
         }
+        logger = this.getLogger();
         logger.info("AuthAnvilLogin enabled");
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Geyser-Spigot")&&Bukkit.getPluginManager().isPluginEnabled("Floodgate")) {
-            geyserApiBase = Geyser.api();
-            floodgateApi = InstanceHolder.getApi();
-            Config.isGeyserLoaded = true;
-            logger.info("Geyser and Floodgate loaded");
-            Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("Geyser-Spigot")).getLogger().info("AuthAnvilLogin loaded");
-        }else {
-            logger.warning("You seem not to enable Geyser or Floodgate");
-        }
+        
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
             api = AuthMeApi.getInstance();

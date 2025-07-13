@@ -6,7 +6,7 @@
 
     <groupId>net.chen.ll</groupId>
     <artifactId>authanvillogin</artifactId>
-    <version>1.2-Stable</version>
+    <version>1.2.1-Stable</version>
     <packaging>jar</packaging>
 
     <name>authanvillogin</name>
@@ -19,6 +19,7 @@
     <build>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -114,6 +115,7 @@
             <id>opencollab-snapshot</id>
             <url>https://repo.opencollab.dev/main/</url>
         </repository>
+
     </repositories>
 
     <dependencies>
