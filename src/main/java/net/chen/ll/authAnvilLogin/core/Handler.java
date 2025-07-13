@@ -37,10 +37,10 @@ public class Handler implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         try {
-            if(player.getClientBrandName().contains("Geyser")){
-                api.forceLogin(player);
-                return;
-            }
+//            if(player.getClientBrandName().contains("Geyser")){
+//                api.forceLogin(player);
+//                return;
+//            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -53,8 +53,8 @@ public class Handler implements Listener {
                     logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
                 }
             }else {
-                player.sendMessage("检测到你是第一次来服务器,", "请先注册账号");
-                logger.info(player.getName()+" is new with "+player.getClientBrandName());
+                player.sendMessage("检测到你是第一次来服务器,请先注册账号");
+                //logger.info(player.getName()+" is new with "+player.getClientBrandName());
                 openRegisterUI(player);
             }
         } catch (Exception e) {
@@ -97,12 +97,6 @@ public class Handler implements Listener {
             player.sendMessage("无法打开");
         }
         // 打开UI
-    }
-    private boolean isGeyserPlayer(Player player) {
-        if (isGeyserLoaded) {
-            return AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId());
-        }
-        return false;
     }
 
     private void handleLogin(Player player, String password) {

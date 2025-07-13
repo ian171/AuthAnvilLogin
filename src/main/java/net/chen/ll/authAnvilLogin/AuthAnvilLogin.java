@@ -3,7 +3,6 @@ package net.chen.ll.authAnvilLogin;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
-import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import org.bukkit.Bukkit;
@@ -11,8 +10,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.geysermc.api.GeyserApiBase;
-import org.geysermc.floodgate.api.FloodgateApi;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -25,8 +22,6 @@ import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();
-    public static GeyserApiBase geyserApiBase;
-    public static FloodgateApi floodgateApi;
 
     //public static ProtocolManager protocolManager;
     @Override
