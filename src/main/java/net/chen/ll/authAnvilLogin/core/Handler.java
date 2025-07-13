@@ -3,15 +3,13 @@ package net.chen.ll.authAnvilLogin.core;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.wesjd.anvilgui.AnvilGUI;
-import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.geysermc.cumulus.form.CustomForm;
-import org.geysermc.cumulus.form.ModalForm;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -31,23 +29,13 @@ public class Handler implements Listener {
         double seed2 = (seed * Math.cos(seed)+Math.tan(Math.abs(seed - 0.1)));
         return String.valueOf(Math.abs((Math.random()*seed2)));
     }
+    public static boolean isLeaf() {
+        return Bukkit.getVersion().toLowerCase().contains("leaf") ||
+                Bukkit.getName().equalsIgnoreCase("leaf");
+    }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-//        if(AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId())) {
-//            api.forceLogin(player);
-//            if (isDebug){
-//                logger.info(player.getName()+" is Geyser Client");
-//                logger.info("Last IP:"+api.getLastIp(player.getName()));
-//            }
-//            return;
-//        }
-        /*
-          Geyser客户端登录
-          无法运行
-         */
-        //临时代替方案
-        // try为了防止在低版本上出现问题
         try {
             if(player.getClientBrandName().contains("Geyser")){
                 api.forceLogin(player);
@@ -56,16 +44,21 @@ public class Handler implements Listener {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
+        logger.warning(Boolean.toString(isLeaf()));
 
-        if (api.isRegistered(player.getName())) {
-            openAnvilUI(player);
-            if (isDebug){
-                logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
+        try {
+            if (api.isRegistered(player.getName())) {
+                openAnvilUI(player);
+                if (isDebug){
+                    logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
+                }
+            }else {
+                player.sendMessage("检测到你是第一次来服务器,", "请先注册账号");
+                logger.info(player.getName()+" is new with "+player.getClientBrandName());
+                openRegisterUI(player);
             }
-        }else {
-            player.sendMessage("检测到你是第一次来服务器,", "请先注册账号");
-            logger.info(player.getName()+" is new with "+player.getClientBrandName());
-            openRegisterUI(player);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     @EventHandler
@@ -74,6 +67,7 @@ public class Handler implements Listener {
         UUID playerUUID = player.getUniqueId();
         loginAttempts.remove(playerUUID);
     }
+
     public void openAnvilUI(Player player) {
         try {
             new AnvilGUI.Builder()

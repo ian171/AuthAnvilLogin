@@ -33,12 +33,8 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();
         ConfigLoader.loadConfig();
-
-        if(Config.getVer() <= 0){
-            getLogger().severe("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
-            throw new NumberFormatException("AuthAnvilLogin 插件版本获取失败，请检查配置文件。");
-        }
         logger = this.getLogger();
+        logger.info("1.2.1-Stable Version By Chen");
         logger.info("AuthAnvilLogin enabled");
 
         
