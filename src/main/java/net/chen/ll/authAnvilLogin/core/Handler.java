@@ -98,12 +98,6 @@ public class Handler implements Listener {
         }
         // 打开UI
     }
-    private boolean isGeyserPlayer(Player player) {
-        if (isGeyserLoaded) {
-            return AuthAnvilLogin.geyserApiBase.isBedrockPlayer(player.getUniqueId());
-        }
-        return false;
-    }
 
     private void handleLogin(Player player, String password) {
         UUID playerUUID = player.getUniqueId();

@@ -25,8 +25,7 @@ import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();
-    public static GeyserApiBase geyserApiBase;
-    public static FloodgateApi floodgateApi;
+
 
     //public static ProtocolManager protocolManager;
     @Override
@@ -34,7 +33,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         saveDefaultConfig();
         ConfigLoader.loadConfig();
         logger = this.getLogger();
-        logger.info("1.2.1-Stable Version By Chen");
+        logger.info("1.2.1 Version By Chen");
         logger.info("AuthAnvilLogin enabled");
 
         
