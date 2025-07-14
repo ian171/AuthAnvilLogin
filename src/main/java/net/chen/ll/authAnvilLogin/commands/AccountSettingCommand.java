@@ -42,8 +42,29 @@ public class AccountSettingCommand implements CommandExecutor {
             }
         }
         if (commandSender instanceof Player) {
+                if(isVersionLessThan116()){
+                    commandSender.sendMessage("Unsupported Version");
+                    return true;
+                }
             AccountManagerGui.open((Player) commandSender);
         }
         return true;
     }
+    private static boolean isVersionLessThan116() {
+        try {
+            // 例如返回 "1.12.2-R0.1-SNAPSHOT"
+            String version = Bukkit.getBukkitVersion().split("-")[0];
+            String[] parts = version.split("\\.");
+
+            int major = Integer.parseInt(parts[0]); // 应为 1
+            int minor = Integer.parseInt(parts[1]); // 如 12、13、16
+
+            if (major < 1) return true;
+            return minor < 16;
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return false; // 发生错误时默认不小于
+        }
+    }
+
 }

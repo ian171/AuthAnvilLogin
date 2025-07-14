@@ -4,12 +4,15 @@ import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -70,28 +73,33 @@ public class Handler implements Listener {
 
     public void openAnvilUI(Player player) {
         try {
-            new AnvilGUI.Builder()
-                    .title("请输入密码")
-                    .text("")
-                    .itemLeft(new ItemStack(Config.getItemsListMap().get("login.left")))
-                    .itemRight(new ItemStack(Config.getItemsListMap().get("login.right")))
-                    .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))// 插件实例
-                    .onClickAsync((slot, stateSnapshot) -> {
-                        if (slot == AnvilGUI.Slot.OUTPUT){
-                            String input = stateSnapshot.getText();// 获取玩家输入的文本
-                            handleLogin(player, input);
-                        }
-                        if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
-                            openRegisterUI(player);
-                        }
-                        // 处理点击事件
-                        return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
-                            // 完成时执行的代码
-                            logger.info(player.getName() + " Done");
-                        })));
-                    })
-                    .itemOutput(new ItemStack(Config.getItemsListMap().get("login.output"))) // 设置输出物品
-                    .open(player);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    new AnvilGUI.Builder()
+                            .title("请输入密码")
+                            .text("")
+                            .itemLeft(new ItemStack(Config.getItemsListMap().get("login.left")))
+                            .itemRight(new ItemStack(Config.getItemsListMap().get("login.right")))
+                            .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))// 插件实例
+                            .onClickAsync((slot, stateSnapshot) -> {
+                                if (slot == AnvilGUI.Slot.OUTPUT){
+                                    String input = stateSnapshot.getText();// 获取玩家输入的文本
+                                    handleLogin(player, input);
+                                }
+                                if (slot == AnvilGUI.Slot.INPUT_RIGHT) {
+                                    openRegisterUI(player);
+                                }
+                                // 处理点击事件
+                                return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
+                                    // 完成时执行的代码
+                                    logger.info(player.getName() + " Done");
+                                })));
+                            })
+                            .itemOutput(new ItemStack(Config.getItemsListMap().get("login.output"))) // 设置输出物品
+                            .open(player);
+                }
+            }.runTaskLater(AuthAnvilLogin.getProvidingPlugin(AuthAnvilLogin.class),1 );
         } catch (Exception e) {
             logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
             player.sendMessage("无法打开");
@@ -122,28 +130,34 @@ public class Handler implements Listener {
     }
     public void openRegisterUI(Player player) {
         player.closeInventory();
-        try {
-            new AnvilGUI.Builder()
-                    .title("注册")
-                    .text("")
-                    .itemOutput(new ItemStack(Config.getItemsListMap().get("register.output")))
-                    .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))
-                    .itemLeft(new ItemStack(Config.getItemsListMap().get("register.left")))
-                    .itemRight(new ItemStack(Config.getItemsListMap().get("register.right")))
-                    .onClickAsync((slot, stateSnapshot) -> {
-                        if (slot == AnvilGUI.Slot.OUTPUT) {
-                            String input = stateSnapshot.getText();
-                            handleRegistry(player, input);
-                        }
-                        return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    new AnvilGUI.Builder()
+                            .title("注册")
+                            .text("")
+                            .itemOutput(new ItemStack(Config.getItemsListMap().get("register.output")))
+                            .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))
+                            .itemLeft(new ItemStack(Config.getItemsListMap().get("register.left")))
+                            .itemRight(new ItemStack(Config.getItemsListMap().get("register.right")))
+                            .onClickAsync((slot, stateSnapshot) -> {
+                                if (slot == AnvilGUI.Slot.OUTPUT) {
+                                    String input = stateSnapshot.getText();
+                                    handleRegistry(player, input);
+                                }
+                                return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
 
-                        })));
+                                })));
 
-                    }).open(player);
-        } catch (Exception e) {
-            logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
-            player.sendMessage("无法打开");
-        }
+                            }).open(player);
+                } catch (Exception e) {
+                    logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
+                    player.sendMessage("无法打开");
+                }
+            }
+        }.run();
+
     }
     public void handleRegistry(Player player, String password) {
         if (api.isRegistered(player.getName())) {

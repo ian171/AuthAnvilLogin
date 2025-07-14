@@ -46,7 +46,7 @@ public class ConfigLoader {
             logger.info("Config Version:"+ Config.getVer());
             if (isDebug){
                 for (String key : config.getKeys(false)) {
-                    logger.info(Component.empty().content(key + ":" + config.get(key))+"");
+                    logger.info(key + ":" + config.get(key));
                     //Bukkit.getServer().sendPluginMessage(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class),Component.empty().content(key + ":" + config.get(key)).toString());
                 }
             }

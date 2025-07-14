@@ -33,11 +33,11 @@ public class AccountManagerGui implements Listener {
             if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.REDSTONE)) {
                 AuthAnvilLogin.api.forceLogout(p);
                 p.closeInventory();
-                p.kick(Component.text("已注销登录"));
+                p.kickPlayer(p.getName());
             }else if(event.getCurrentItem().getType().equals(Material.IRON_INGOT)){
                 AuthAnvilLogin.api.forceUnregister(p);
                 p.closeInventory();
-                p.kick(Component.text("账户已删除"));
+                p.kickPlayer(p.getName());
             }
         }
     }
