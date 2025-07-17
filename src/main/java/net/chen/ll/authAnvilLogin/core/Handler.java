@@ -2,6 +2,7 @@ package net.chen.ll.authAnvilLogin.core;
 
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -25,6 +26,7 @@ public class Handler implements Listener {
     public static AuthMeApi api = AuthAnvilLogin.api;
     public static final String[] subCommands = {"reload","list"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
+    @Deprecated
     private String randomPasswordGen(int seed){
         double seed2 = (seed * Math.cos(seed)+Math.tan(Math.abs(seed - 0.1)));
         return String.valueOf(Math.abs((Math.random()*seed2)));
@@ -44,7 +46,9 @@ public class Handler implements Listener {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-        logger.warning(Boolean.toString(isLeaf()));
+        if (isDebug) {
+            logger.warning(Boolean.toString(isLeaf()));
+        }
 
         try {
             if (api.isRegistered(player.getName())) {
@@ -58,7 +62,7 @@ public class Handler implements Listener {
                 openRegisterUI(player);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.severe(e.getMessage());
         }
     }
     @EventHandler
@@ -73,8 +77,8 @@ public class Handler implements Listener {
             new AnvilGUI.Builder()
                     .title("请输入密码")
                     .text("")
-                    .itemLeft(new ItemStack(Config.getItemsListMap().get("login.left")))
-                    .itemRight(new ItemStack(Config.getItemsListMap().get("login.right")))
+                    .itemLeft(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT)))
+                    .itemRight(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_RIGHT)))
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))// 插件实例
                     .onClickAsync((slot, stateSnapshot) -> {
                         if (slot == AnvilGUI.Slot.OUTPUT){
@@ -90,7 +94,7 @@ public class Handler implements Listener {
                             logger.info(player.getName() + " Done");
                         })));
                     })
-                    .itemOutput(new ItemStack(Config.getItemsListMap().get("login.output"))) // 设置输出物品
+                    .itemOutput(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT))) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
             logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
@@ -126,10 +130,10 @@ public class Handler implements Listener {
             new AnvilGUI.Builder()
                     .title("注册")
                     .text("")
-                    .itemOutput(new ItemStack(Config.getItemsListMap().get("register.output")))
+                    .itemOutput(new ItemStack(Config.getItemsListMap().get(AnvilSlot.REGISTER_OUT)))
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))
-                    .itemLeft(new ItemStack(Config.getItemsListMap().get("register.left")))
-                    .itemRight(new ItemStack(Config.getItemsListMap().get("register.right")))
+                    .itemLeft(new ItemStack(Config.getItemsListMap().get(AnvilSlot.REGISTER_LEFT)))
+                    .itemRight(new ItemStack(Config.getItemsListMap().get(AnvilSlot.REGISTER_RIGHT)))
                     .onClickAsync((slot, stateSnapshot) -> {
                         if (slot == AnvilGUI.Slot.OUTPUT) {
                             String input = stateSnapshot.getText();

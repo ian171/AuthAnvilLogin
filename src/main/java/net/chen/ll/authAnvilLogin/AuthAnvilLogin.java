@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 
+
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();

@@ -1,6 +1,8 @@
 package net.chen.ll.authAnvilLogin.core;
 
+import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import org.bukkit.Material;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +12,7 @@ public final class Config {
     private Config() {
 
     }
+    public static String prefix = "AuthAnvilLogin";
     public static int MAX_ATTEMPTS=3;
     public static boolean isRequestUpper = true;
     public static boolean checkLowestPassword = true;
@@ -17,13 +20,14 @@ public final class Config {
     public static boolean isDebug = false;
     private static int ver;
     public static boolean isGeyserLoaded = false;
-    private static final Map<String, Material> items = new ConcurrentHashMap<>();
-    public static Map<String ,Material> getItemsListMap(){
+    private static final Map<AnvilSlot, Material> items = new ConcurrentHashMap<>();
+    public static Map<AnvilSlot ,Material> getItemsListMap(){
         return items;
     }
-    public static void addItemsMap(String s,Material material) {
+    public static void addItemsMap(@NotNull AnvilSlot s, @NotNull Material material) {
         items.put(s,material);
     }
+
     public static int getVer() {
 //        if (ver != 0){
 //            return ver;
