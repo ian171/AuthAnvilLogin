@@ -4,7 +4,8 @@ import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,7 +19,10 @@ public final class Config {
     public static boolean checkLowestPassword = true;
     public static boolean checkLongestPassword = true;
     public static boolean isDebug = false;
+    public static boolean enableAgreement;
+    public static List<String> agreements = new ArrayList<>();
     private static int ver;
+    @Deprecated
     public static boolean isGeyserLoaded = false;
     private static final Map<AnvilSlot, Material> items = new ConcurrentHashMap<>();
     public static Map<AnvilSlot ,Material> getItemsListMap(){
@@ -27,7 +31,6 @@ public final class Config {
     public static void addItemsMap(@NotNull AnvilSlot s, @NotNull Material material) {
         items.put(s,material);
     }
-
     public static int getVer() {
 //        if (ver != 0){
 //            return ver;

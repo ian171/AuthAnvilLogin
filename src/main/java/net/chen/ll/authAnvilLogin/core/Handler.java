@@ -115,6 +115,7 @@ public class Handler implements Listener {
             if (api.checkPassword(player.getName(), password)) {
                 player.performCommand("l "+password);
                 player.sendMessage("登录成功！");
+
                 player.closeInventory();
             } else {
                 player.sendMessage("密码错误，请重新输入！");
@@ -123,6 +124,9 @@ public class Handler implements Listener {
             player.sendMessage("你还没有注册，请先注册！");
             openRegisterUI(player);
         }
+    }
+    private void openAgreement(Player player){
+
     }
     public void openRegisterUI(Player player) {
         player.closeInventory();

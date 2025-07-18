@@ -25,6 +25,8 @@ public class ConfigLoader {
             checkLowestPassword = config.getBoolean("config.checkLowestPassword");
             checkLongestPassword = config.getBoolean("config.checkLongestPassword");
             isDebug = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig().getBoolean("config.isDebug");
+            enableAgreement = config.getBoolean("config.enableAgreement");
+            agreements = config.getStringList("agreement");
             try {
                 Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
                 Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));

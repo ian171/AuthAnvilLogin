@@ -6,6 +6,7 @@ config:
   isRequestUpper: true
   checkLowestPassword: true
   checkLongestPassword: true
+  enableAgreement: false
 materials:
   login:
     left: "PAPER"
@@ -15,3 +16,5 @@ materials:
     left: "DIAMOND"
     right: "IRON_INGOT"
     output: "ARROW"
+agreement:
+  - ""
