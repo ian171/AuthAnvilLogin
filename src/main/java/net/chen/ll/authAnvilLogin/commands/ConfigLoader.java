@@ -2,6 +2,7 @@ package net.chen.ll.authAnvilLogin.commands;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
+import net.chen.ll.authAnvilLogin.core.CustomConfig;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -27,6 +28,7 @@ public class ConfigLoader {
             isDebug = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig().getBoolean("config.isDebug");
             enableAgreement = config.getBoolean("config.enableAgreement");
             agreements = config.getStringList("agreement");
+            allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class),"data.yml");
             try {
                 Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
                 Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));

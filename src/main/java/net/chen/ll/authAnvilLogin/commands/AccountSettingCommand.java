@@ -1,6 +1,7 @@
 package net.chen.ll.authAnvilLogin.commands;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -26,6 +27,7 @@ public class AccountSettingCommand implements CommandExecutor {
             if(strings[0].equals("reload")){
                 AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).reloadConfig();
                 ConfigLoader.loadConfig();
+                Config.allow_players.reload();
                 return true;
             }
             if (strings[0].equals("list")) {

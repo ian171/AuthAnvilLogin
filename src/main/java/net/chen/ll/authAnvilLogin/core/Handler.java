@@ -2,6 +2,7 @@ package net.chen.ll.authAnvilLogin.core;
 
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -115,7 +116,7 @@ public class Handler implements Listener {
             if (api.checkPassword(player.getName(), password)) {
                 player.performCommand("l "+password);
                 player.sendMessage("登录成功！");
-
+                openAgreement(player);
                 player.closeInventory();
             } else {
                 player.sendMessage("密码错误，请重新输入！");
@@ -126,7 +127,7 @@ public class Handler implements Listener {
         }
     }
     private void openAgreement(Player player){
-
+        Agreement.open(player);
     }
     public void openRegisterUI(Player player) {
         player.closeInventory();

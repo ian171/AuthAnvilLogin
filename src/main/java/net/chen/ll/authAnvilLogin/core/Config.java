@@ -13,6 +13,7 @@ public final class Config {
     private Config() {
 
     }
+    public static CustomConfig allow_players;
     public static String prefix = "AuthAnvilLogin";
     public static int MAX_ATTEMPTS=3;
     public static boolean isRequestUpper = true;

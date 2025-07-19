@@ -26,8 +26,8 @@ import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();
-
-
+    public static String runtime = System.getProperty("user.dir");
+    public static String plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
     //public static ProtocolManager protocolManager;
     @Override
     public void onEnable() {

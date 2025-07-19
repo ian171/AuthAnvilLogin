@@ -2,6 +2,7 @@ package net.chen.ll.authAnvilLogin.gui;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
+import net.chen.ll.authAnvilLogin.util.YamlUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,12 +14,20 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Agreement implements Listener {
     private static Inventory inv;
     public static void open(Player player){
+        try {
+            if(Config.allow_players.getConfig().getString("players").contains(player.getUniqueId().toString())){
+                return;
+            }
+        } catch (NullPointerException ignored) {
+
+        }
         inv = Bukkit.createInventory(player,18);
         for(int i = 0;i <= Config.agreements.size();i++){
             if (i<8) {
@@ -54,6 +63,10 @@ public class Agreement implements Listener {
             event.setCancelled(true);
             if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.IRON_INGOT)) {
                 //TODO:同意逻辑
+                YamlUtil.addToListIfAbsent(Config.allow_players.getConfig(),
+                        new File(AuthAnvilLogin.plugin_path + "/AuthAnvilLogin/data.yml"),
+                        "players",p.getUniqueId().toString(),
+                        true);
                 p.closeInventory();
             }
         }
