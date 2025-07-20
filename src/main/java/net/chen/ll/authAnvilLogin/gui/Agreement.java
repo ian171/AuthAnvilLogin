@@ -16,27 +16,33 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Agreement implements Listener {
     private static Inventory inv;
-    public static void open(Player player){
-        try {
-            if(Config.allow_players.getConfig().getString("players").contains(player.getUniqueId().toString())){
-                return;
-            }
-        } catch (NullPointerException ignored) {
+    public static void open(Player player) {
+        if (!(Config.allow_players.getConfig().contains("players." + player.getUniqueId()))) {
 
-        }
-        inv = Bukkit.createInventory(player,18);
-        for(int i = 0;i <= Config.agreements.size();i++){
-            if (i<8) {
-                addItem(inv,Material.PAPER,Config.agreements.get(i),new ArrayList<>(),i+1);
+            Inventory inv = Bukkit.createInventory(player, 18, "§b协议许可");
+
+            for (int i = 0; i < Config.agreements.size(); i++) {
+                if (i < 8) {
+                    addItem(inv, Material.PAPER, Config.agreements.get(i), new ArrayList<>(), i + 1);
+                }
             }
+
+            addItem(inv, Material.IRON_INGOT, "Allow", new ArrayList<>(), 11);
+
+            player.openInventory(inv);
+
+        } else {
+            AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).logger.info(
+                    player.getName() + " 未同意许可（" + player.getUniqueId() + ") " + System.currentTimeMillis()
+            );
         }
-        addItem(inv,Material.IRON_INGOT,"Allow",new ArrayList<>(),11);
-        player.openInventory(inv);
     }
+
     private static void addItem(Inventory inventory, Material material, ItemMeta itemMeta, String name, List<String> lore, int index) {
         ItemStack item = new ItemStack(material);
         itemMeta.setDisplayName(name);
@@ -52,6 +58,8 @@ public class Agreement implements Listener {
         meta.setDisplayName(name);
         if (lore != null) {
             meta.setLore(lore);
+        }else {
+            meta.setLore(Collections.singletonList(" "));
         }
         item.setItemMeta(meta);
         inventory.setItem(index, item);

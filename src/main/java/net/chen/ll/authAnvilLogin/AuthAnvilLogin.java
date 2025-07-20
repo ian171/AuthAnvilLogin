@@ -6,6 +6,7 @@ import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
+import net.chen.ll.authAnvilLogin.gui.Agreement;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -26,12 +27,14 @@ import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();
-    public static String runtime = System.getProperty("user.dir");
-    public static String plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
+    public static String runtime;
+    public static String plugin_path ;
     //public static ProtocolManager protocolManager;
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        runtime = System.getProperty("user.dir");
+        plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
         ConfigLoader.loadConfig();
         logger = this.getLogger();
         logger.info("1.2.1 Version By Chen");
@@ -54,6 +57,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents( new Handler(), this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
+        getServer().getPluginManager().registerEvents(new Agreement(),this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
     }
