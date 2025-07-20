@@ -28,7 +28,11 @@ public class ConfigLoader {
             isDebug = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig().getBoolean("config.isDebug");
             enableAgreement = config.getBoolean("config.enableAgreement");
             agreements = config.getStringList("agreement");
-            allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class),"data.yml");
+            if (isDebug) {
+                logger.warning("You are using unsupported functions,We do not recommend you to do that!");
+                allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
+                logger.fine("Started!");
+            }
             try {
                 Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
                 Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));
