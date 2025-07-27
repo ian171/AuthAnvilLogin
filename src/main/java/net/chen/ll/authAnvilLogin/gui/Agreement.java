@@ -72,7 +72,7 @@ public class Agreement implements Listener {
             if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.IRON_INGOT)) {
                 //TODO:同意逻辑
                 YamlUtil.addToListIfAbsent(Config.allow_players.getConfig(),
-                        new File(AuthAnvilLogin.plugin_path + "/AuthAnvilLogin/data.yml"),
+                        //new File(AuthAnvilLogin.plugin_path + "/AuthAnvilLogin/data.yml"),
                         "players",p.getUniqueId().toString(),
                         true);
                 p.closeInventory();

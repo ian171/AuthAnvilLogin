@@ -29,6 +29,19 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
     public static String plugin_path ;
+    public static String version = "1.2.2";
+
+    @Override
+    public void onLoad() {
+        if(Bukkit.getBukkitVersion().contains("1.12")){
+            System.err.println("请使用\"1.12special\"版本+java21: https://github.com/ian171/AuthAnvilLogin/releases/");
+            System.err.println("Please use \"1.12special\" with java21: https://github.com/ian171/AuthAnvilLogin/releases/");
+            Bukkit.getPluginManager().disablePlugin(this);
+            throw new RuntimeException("\rFailed to load Plugins,You're using unsupported version of minecraft");
+        }
+        System.out.println("Self-Examination has been passed");
+    }
+
     //public static ProtocolManager protocolManager;
     @Override
     public void onEnable() {
@@ -37,10 +50,7 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
         ConfigLoader.loadConfig();
         logger = this.getLogger();
-        logger.info("1.2.1 Version By Chen");
-        logger.info("AuthAnvilLogin enabled");
-
-        
+        logger.info(version+" Version By Chen");
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
             api = AuthMeApi.getInstance();
@@ -60,13 +70,15 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new Agreement(),this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
+        logger.info("AuthAnvilLogin enabled");
     }
     @Override
     public void onDisable() {
-        logger.info("AuthAnvilLogin disabled");
+        logger.info("AuthAnvilLogin disabling");
         Handler.api = null;
-        logger = null;
         Handler.loginAttempts.clear();
+        logger.info("AuthAnvilLogin "+version+" disabled");
+        logger = null;
     }
     @Override
     public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
@@ -74,26 +86,4 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         if (args.length == 0) return Arrays.asList(subCommands);
         return Arrays.stream(subCommands).filter(s -> s.startsWith(args[0])).toList();
     }
-
-
-//    @EventHandler
-//    public void onInventoryClick(PlayerInteractEvent event) {
-//        Player player = event.getPlayer();
-//
-//        // 检查玩家是否在操作铁砧UI
-//        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.ANVIL) {
-//            String password = "";  // 从UI中获取玩家输入的密码（具体实现需要进一步补充）
-//
-//            // 处理密码验证
-//            if (api.isRegistered(player.getName())) {
-//                if (api.checkPassword(player.getName(), password)) {
-//                    player.sendMessage("登录成功！");
-//                } else {
-//                    player.sendMessage("密码错误，请重新尝试！");
-//                }
-//            } else {
-//                player.sendMessage("你还没有注册，请先注册！");
-//            }
-//        }
-//    }
 }

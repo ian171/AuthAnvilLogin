@@ -27,7 +27,9 @@ public class AccountSettingCommand implements CommandExecutor {
             if(strings[0].equals("reload")){
                 AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).reloadConfig();
                 ConfigLoader.loadConfig();
-                Config.allow_players.reload();
+                if (Config.isDebug) {
+                    Config.allow_players.reload();
+                }
                 return true;
             }
             if (strings[0].equals("list")) {

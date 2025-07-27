@@ -6,7 +6,7 @@
 
     <groupId>net.chen.ll</groupId>
     <artifactId>authanvillogin</artifactId>
-    <version>1.2.1-Stable</version>
+    <version>1.2.2-Stable</version>
     <packaging>jar</packaging>
 
     <name>authanvillogin</name>
@@ -37,6 +37,7 @@
                         <include>net/wesjd/anvilgui/**</include>
                         <include>net/chen/ll/authAnvilLogin/**</include>
                     </includes>
+
                 </configuration>
             </plugin>
             <plugin>

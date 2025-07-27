@@ -30,7 +30,7 @@ public class ConfigLoader {
             agreements = config.getStringList("agreement");
             if (isDebug) {
                 logger.warning("You are using unsupported functions,We do not recommend you to do that!");
-                allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
+                //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
                 logger.fine("Started!");
             }
             try {
@@ -54,8 +54,8 @@ public class ConfigLoader {
             if (isConfigValid) {
                 logger.info("配置文件读取成功");
             }
-            logger.info("Config Version:"+ Config.getVer());
             if (isDebug){
+                logger.info("Config Version:"+ Config.getVer());
                 for (String key : config.getKeys(false)) {
                     Bukkit.getServer().sendMessage(Component.empty().content(key + ":" + config.get(key)));
                 }
