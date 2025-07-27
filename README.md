@@ -10,14 +10,29 @@ This is a plugin for Minecraft server, which can be used to login with AnvilGui
 
 - 密码安全性：插件支持多种密码策略，包括检查密码是否包含大写字母、是否满足最短密码要求以及是否满足最长密码要求。
 
-- 配置灵活：通过 config.yml 文件，管理员可以轻松配置登录尝试的最大次数、密码策略等设置，以满足不同服务器的需求。
+- 配置灵活：通过 config.yml 文件，管理员可以轻松配置登录尝试的最大次数、密码策略等设置，以满足不同服务器的需求；允许服主配置用户条款
 Config实例：
 ```
+ver: 1
 max-attempts: 3
+debug: false
 config:
-    isRequestUpper: true
-    checkLowestPassword: true
-    checkLongestPassword: true
+  prefix: AuthAnvilLogin
+  isRequestUpper: true
+  checkLowestPassword: true
+  checkLongestPassword: true
+  enableAgreement: false
+materials:
+  login:
+    left: "PAPER"
+    right: "REDSTONE"
+    output: "ARROW"
+  register:
+    left: "DIAMOND"
+    right: "IRON_INGOT"
+    output: "ARROW"
+agreement:
+  - ""
 ```
 
 权限控制：插件提供了详细的权限控制，确保只有拥有相应权限的玩家才能使用特定的命令和功能。
