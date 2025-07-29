@@ -7,6 +7,7 @@ import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
+import net.chen.ll.authAnvilLogin.gui.KcLoginGui;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -24,7 +25,7 @@ import java.util.logging.Logger;
 import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 
 
-public final class AuthAnvilLogin extends JavaPlugin implements Listener {
+public final class AuthAnvilLogin extends JavaPlugin {
     public Logger logger;
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
@@ -41,6 +42,10 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
         System.out.println("Self-Examination has been passed");
     }
+    private boolean isFloodgateEnabled(String plugin) {
+        return !Bukkit.getPluginManager().isPluginEnabled(plugin);
+    }
+
 
     //public static ProtocolManager protocolManager;
     @Override
@@ -64,10 +69,17 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        if (isFloodgateEnabled("floodgate")) {
+            getLogger().warning("The required plugin Floodgate is missing, plugin will not support Bedrock");
+            return;
+        }else {
+            new KcLoginGui();
+            logger.info("Loaded for Bedrock!!");
+        }
 
         getServer().getPluginManager().registerEvents( new Handler(), this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
-        getServer().getPluginManager().registerEvents(new Agreement(),this);
+        //getServer().getPluginManager().registerEvents(new Agreement(),this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
         logger.info("AuthAnvilLogin enabled");

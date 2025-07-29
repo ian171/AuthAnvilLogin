@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Deprecated
 public class Agreement implements Listener {
     private static Inventory inv;
     public static void open(Player player) {

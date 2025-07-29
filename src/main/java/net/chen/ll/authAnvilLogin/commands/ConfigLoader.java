@@ -15,7 +15,7 @@ import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class ConfigLoader {
     public static Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
-    private static Configuration config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
+    public static Configuration config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
     public static void loadConfig() {
         config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
         boolean isConfigValid = true;
@@ -25,6 +25,8 @@ public class ConfigLoader {
             isRequestUpper = config.getBoolean("config.isRequestUpper");
             checkLowestPassword = config.getBoolean("config.checkLowestPassword");
             checkLongestPassword = config.getBoolean("config.checkLongestPassword");
+            delaytime = config.getLong("config.delay-time",45L);
+            closeKick = config.getBoolean("config.close-kick", true);
             isDebug = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig().getBoolean("config.isDebug");
             enableAgreement = config.getBoolean("config.enableAgreement");
             agreements = config.getStringList("agreement");
