@@ -21,6 +21,11 @@ public final class Config {
     public static boolean checkLongestPassword = true;
     public static boolean isDebug = false;
     public static boolean enableAgreement;
+//    delayTime = config.getLong("delay-time", 45L);
+//    debugMode = config.getBoolean("debug", false);
+//    closeKick = config.getBoolean("close-kick", true);
+    public static long delaytime;
+    public static boolean closeKick;
     public static List<String> agreements = new ArrayList<>();
     private static int ver;
     @Deprecated

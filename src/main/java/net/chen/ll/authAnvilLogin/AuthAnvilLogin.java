@@ -7,6 +7,7 @@ import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
+import net.chen.ll.authAnvilLogin.gui.KcLoginGui;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -41,6 +42,10 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
         }
         System.out.println("Self-Examination has been passed");
     }
+    private boolean isFloodgateEnabled(String plugin) {
+        return !Bukkit.getPluginManager().isPluginEnabled(plugin);
+    }
+
 
     //public static ProtocolManager protocolManager;
     @Override
@@ -63,6 +68,13 @@ public final class AuthAnvilLogin extends JavaPlugin implements Listener {
             getLogger().severe("AuthMe 插件未启用！");
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+        if (isFloodgateEnabled("floodgate")) {
+            getLogger().warning("The required plugin Floodgate is missing, plugin will not support Bedrock");
+            return;
+        }else {
+            new KcLoginGui();
+            logger.info("Loaded for Bedrock!!");
         }
 
         getServer().getPluginManager().registerEvents( new Handler(), this);

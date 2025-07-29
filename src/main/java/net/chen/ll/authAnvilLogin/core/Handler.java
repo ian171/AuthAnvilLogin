@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin.core;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
+import net.chen.ll.authAnvilLogin.gui.KcLoginGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -13,6 +14,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.geysermc.floodgate.api.FloodgateApi;
+import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -40,17 +43,30 @@ public class Handler implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        try {
-            if(player.getClientBrandName().contains("Geyser")){
-                api.forceLogin(player);
-                return;
-            }
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        FloodgateApi floodgateApi = FloodgateApi.getInstance();
+
+        if (!floodgateApi.isFloodgatePlayer(player.getUniqueId())) return;
+
+        logger.info("Connected with Bedrock:"+player.getUniqueId());
         if (isDebug) {
             logger.warning(Boolean.toString(isLeaf()));
         }
+        try {
+            Class.forName("org.geysermc.floodgate.api.FloodgateApi");
+            if(player.getClientBrandName().contains("Geyser")){
+                FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
+                new KcLoginGui().handleAuthentication(player, floodgatePlayer);
+                return;
+            }
+        } catch (ClassNotFoundException ignored) {
+
+        }
+//        if(player.getClientBrandName().contains("Geyser")){
+////                api.forceLogin(player);
+//            FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
+//            new KcLoginGui().handleAuthentication(player, floodgatePlayer);
+//            return;
+//        }
 
         try {
             if (api.isRegistered(player.getName())) {

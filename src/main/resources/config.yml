@@ -7,6 +7,8 @@ config:
   checkLowestPassword: true
   checkLongestPassword: true
   enableAgreement: false
+  delay-time: 45L
+  close-kick: true
 materials:
   login:
     left: "PAPER"
@@ -16,5 +18,21 @@ materials:
     left: "DIAMOND"
     right: "IRON_INGOT"
     output: "ARROW"
+messages:
+  # Login window
+  login-title: "Login"
+  login-password-title: "Password"
+  login-password-placeholder: "Please enter your password"
+  wrong-password: "&cIncorrect password, please try again"
+  # Registration window
+  reg-title: "Register"
+  reg-password-title: "Password"
+  reg-password-placeholder: "Please enter your password"
+  reg-confirmPassword-title: "Confirm Password"
+  reg-confirmPassword-placeholder: "Please enter your password again"
+  passwords-not-match: "&cPasswords do not match, please try again"
+  password-empty: "&cPassword cannot be empty, please try again"
+  # General prompts
+  close-window: "&cWindow closed, login/registration terminated"
 agreement:
   - ""
