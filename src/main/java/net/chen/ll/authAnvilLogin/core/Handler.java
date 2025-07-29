@@ -3,11 +3,10 @@ package net.chen.ll.authAnvilLogin.core;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
-import net.chen.ll.authAnvilLogin.gui.KcLoginGui;
+import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -55,7 +54,7 @@ public class Handler implements Listener {
             Class.forName("org.geysermc.floodgate.api.FloodgateApi");
             if(player.getClientBrandName().contains("Geyser")){
                 FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
-                new KcLoginGui().handleAuthentication(player, floodgatePlayer);
+                new BedrockGui().handleAuthentication(player, floodgatePlayer);
                 return;
             }
         } catch (ClassNotFoundException ignored) {
@@ -88,6 +87,7 @@ public class Handler implements Listener {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
         loginAttempts.remove(playerUUID);
+        System.gc();
     }
 
     public void openAnvilUI(Player player) {
@@ -131,7 +131,7 @@ public class Handler implements Listener {
         }
         if (api.isRegistered(player.getName())) {
             if (api.checkPassword(player.getName(), password)) {
-                player.performCommand("l "+password);
+                api.forceLogin(player);
                 player.sendMessage("登录成功！");
                 if (isDebug) {
                     logger.warning("Unsupported functions are using");
@@ -183,6 +183,7 @@ public class Handler implements Listener {
         } catch (Exception e) {
             logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
             player.sendMessage("无法打开");
+            System.gc();
         }
     }
     public void handleRegistry(Player player, String password) {

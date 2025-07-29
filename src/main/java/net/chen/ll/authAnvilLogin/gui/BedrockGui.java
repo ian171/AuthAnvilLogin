@@ -12,10 +12,10 @@ import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import java.util.logging.Logger;
 
-public class KcLoginGui {
+public class BedrockGui {
     private static AuthMeApi api;
     private Logger logger;
-    public KcLoginGui(){
+    public BedrockGui(){
         api = AuthAnvilLogin.api;
         logger = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
     }
