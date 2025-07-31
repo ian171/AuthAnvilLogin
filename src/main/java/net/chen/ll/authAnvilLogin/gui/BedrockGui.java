@@ -4,6 +4,7 @@ import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.core.Config;
+import net.chen.ll.authAnvilLogin.util.ConfigUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -134,6 +135,7 @@ public class BedrockGui {
     }
 
     private String getMessage(String key) {
-        return ConfigLoader.config.getString("messages." + key, "&cText missing, please check the configuration file.").replace("&", "§");
+        return ConfigUtil.getMessage(key);
+        //return ConfigLoader.config.getString("messages." + key, "&cText missing, please check the configuration file.").replace("&", "§");
     }
 }

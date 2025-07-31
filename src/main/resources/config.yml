@@ -34,5 +34,7 @@ messages:
   password-empty: "&cPassword cannot be empty, please try again"
   # General prompts
   close-window: "&cWindow closed, login/registration terminated"
+  #Failed
+  failed: "Failed to open"
 agreement:
   - ""

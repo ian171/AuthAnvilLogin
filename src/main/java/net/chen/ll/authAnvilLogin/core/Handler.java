@@ -5,6 +5,7 @@ import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
+import net.chen.ll.authAnvilLogin.util.ConfigUtil;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -93,7 +94,7 @@ public class Handler implements Listener {
     public void openAnvilUI(Player player) {
         try {
             new AnvilGUI.Builder()
-                    .title("请输入密码")
+                    .title(ConfigUtil.getMessage("login-title"))
                     .text("")
                     .itemLeft(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT)))
                     .itemRight(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_RIGHT)))
@@ -164,7 +165,7 @@ public class Handler implements Listener {
                 reg_confirm.setLore(agreements);
             }
             new AnvilGUI.Builder()
-                    .title("注册")
+                    .title(ConfigUtil.getMessage("reg-title"))
                     .text("")
                     .itemOutput(reg_confirm)
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))

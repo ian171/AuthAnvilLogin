@@ -66,7 +66,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         }
         if (isFloodgateEnabled("floodgate")) {
             getLogger().warning("The required plugin Floodgate is missing, plugin will not support Bedrock");
-            return;
+            //return;
         }else {
             new BedrockGui();
             logger.info("Loaded for Bedrock!!");
