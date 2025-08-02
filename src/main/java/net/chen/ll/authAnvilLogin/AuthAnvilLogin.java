@@ -1,6 +1,7 @@
 package net.chen.ll.authAnvilLogin;
 
 import fr.xephi.authme.api.v3.AuthMeApi;
+import net.chen.ll.authAnvilLogin.api.ApiManager;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.core.Handler;
@@ -26,6 +27,10 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static String runtime;
     public static String plugin_path ;
     public static String version = "1.2.2";
+
+    private AuthAnvilLogin(){
+
+    }
 
     @Override
     public void onLoad() {

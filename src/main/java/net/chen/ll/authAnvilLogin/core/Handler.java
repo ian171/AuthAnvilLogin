@@ -2,6 +2,7 @@ package net.chen.ll.authAnvilLogin.core;
 
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.exception.AnvilLoadException;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
@@ -70,7 +71,7 @@ public class Handler implements Listener {
 
         try {
             if (api.isRegistered(player.getName())) {
-                openAnvilUI(player);
+                openLoginUI(player);
                 if (isDebug){
                     logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
                 }
@@ -91,7 +92,7 @@ public class Handler implements Listener {
         System.gc();
     }
 
-    public void openAnvilUI(Player player) {
+    public void openLoginUI(Player player) {
         try {
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("login-title"))
@@ -116,8 +117,9 @@ public class Handler implements Listener {
                     .itemOutput(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT))) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
-            logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
+            //logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
             player.sendMessage("无法打开");
+            throw new AnvilLoadException(e.getMessage());
         }
         // 打开UI
     }
@@ -182,9 +184,11 @@ public class Handler implements Listener {
 
                     }).open(player);
         } catch (Exception e) {
-            logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
+            //logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
+
             player.sendMessage("无法打开");
             System.gc();
+            throw new AnvilLoadException(e.getMessage());
         }
     }
     public void handleRegistry(Player player, String password) {
