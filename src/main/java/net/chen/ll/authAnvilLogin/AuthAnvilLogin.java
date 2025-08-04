@@ -81,7 +81,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new StatusPlaceholder(this).register();
         }
-        getServer().getPluginManager().registerEvents( new Handler(), this);
+        getServer().getPluginManager().registerEvents(Handler.getHandler, this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);

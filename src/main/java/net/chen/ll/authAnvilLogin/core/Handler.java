@@ -12,9 +12,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
@@ -28,10 +31,12 @@ import java.util.logging.Logger;
 import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class Handler implements Listener {
+    public static Handler getHandler = new Handler();
     public Logger logger= AuthAnvilLogin.instance.getLogger();
     public static AuthMeApi api = AuthAnvilLogin.api;
-    public static final String[] subCommands = {"reload","list"};
+    public static final String[] subCommands = {"reload","list","login","register"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
+    private Handler(){}
     @Deprecated
     private String randomPasswordGen(int seed){
         double seed2 = (seed * Math.cos(seed)+Math.tan(Math.abs(seed - 0.1)));
@@ -93,14 +98,24 @@ public class Handler implements Listener {
     }
 
     public void openLoginUI(Player player) {
+        ItemStack left = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
+        left.getItemMeta().setDisplayName("Help");
+        ItemStack right = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
+        right.getItemMeta().setDisplayName(ConfigUtil.getMessage("reg-button"));
+        ItemStack output = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT));
+        output.getItemMeta().setDisplayName(ConfigUtil.getMessage("login-button"));
         try {
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("login-title"))
                     .text("")
-                    .itemLeft(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT)))
-                    .itemRight(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_RIGHT)))
+                    .itemLeft(left)
+                    .itemRight(right)
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))// 插件实例
                     .onClickAsync((slot, stateSnapshot) -> {
+                        if(slot == AnvilGUI.Slot.INPUT_LEFT){
+                            player.sendMessage("Help: "+ link);
+                            player.sendMessage("you can use \"/al login\" to re-open the Gui");
+                        }
                         if (slot == AnvilGUI.Slot.OUTPUT){
                             String input = stateSnapshot.getText();// 获取玩家输入的文本
                             handleLogin(player, input);
@@ -114,14 +129,13 @@ public class Handler implements Listener {
                             logger.info(player.getName() + " Done");
                         })));
                     })
-                    .itemOutput(new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT))) // 设置输出物品
+                    .itemOutput(output) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
             //logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
             player.sendMessage("无法打开");
             throw new AnvilLoadException(e.getMessage());
         }
-        // 打开UI
     }
 
     private void handleLogin(Player player, String password) {

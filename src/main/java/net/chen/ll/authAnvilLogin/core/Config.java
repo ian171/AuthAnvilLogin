@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class Config {
+    public static String link = "https://www.google.com";
+
     private Config() {
 
     }

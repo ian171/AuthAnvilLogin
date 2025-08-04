@@ -10,11 +10,11 @@ public final class ApiManager {
     }
     public static void openGui(Player player,GuiCatagory guiCatagory,AuthAnvilLogin authAnvilLogin){
         authAnvilLogin.logger.info(player.getName()+" opens LoginGui");
-        Handler handler = new Handler();
+
         if(guiCatagory == GuiCatagory.LOGIN){
-            handler.openLoginUI(player);
+            Handler.getHandler.openLoginUI(player);
         }else if (guiCatagory == GuiCatagory.REGISTER){
-            handler.openRegisterUI(player);
+            Handler.getHandler.openRegisterUI(player);
         }
     }
 
