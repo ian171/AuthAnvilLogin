@@ -1,5 +1,8 @@
 net.chen.ll.authAnvilLogin
+net.chen.ll.authAnvilLogin.api
 net.chen.ll.authAnvilLogin.commands
 net.chen.ll.authAnvilLogin.core
+net.chen.ll.authAnvilLogin.core.placeholder
+net.chen.ll.authAnvilLogin.exception
 net.chen.ll.authAnvilLogin.gui
 net.chen.ll.authAnvilLogin.util
