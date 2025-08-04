@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 public final class ApiManager {
     public static AuthAnvilLogin getAnvilApi(){
-        return AuthAnvilLogin.getPlugin(AuthAnvilLogin.class);
+        return AuthAnvilLogin.instance;
     }
     public static void openGui(Player player,GuiCatagory guiCatagory,AuthAnvilLogin authAnvilLogin){
         authAnvilLogin.logger.info(player.getName()+" opens LoginGui");

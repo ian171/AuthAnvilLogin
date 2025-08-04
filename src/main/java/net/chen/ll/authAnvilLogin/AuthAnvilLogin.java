@@ -1,10 +1,10 @@
 package net.chen.ll.authAnvilLogin;
 
 import fr.xephi.authme.api.v3.AuthMeApi;
-import net.chen.ll.authAnvilLogin.api.ApiManager;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.core.Handler;
+import net.chen.ll.authAnvilLogin.core.placeholder.StatusPlaceholder;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import org.bukkit.Bukkit;
@@ -27,8 +27,9 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static String runtime;
     public static String plugin_path ;
     public static String version = "1.2.2";
+    public static AuthAnvilLogin instance;
 
-    private AuthAnvilLogin(){
+    public AuthAnvilLogin(){
 
     }
 
@@ -51,6 +52,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        instance = this;
         runtime = System.getProperty("user.dir");
         plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
         ConfigLoader.loadConfig();
@@ -76,10 +78,11 @@ public final class AuthAnvilLogin extends JavaPlugin {
             new BedrockGui();
             logger.info("Loaded for Bedrock!!");
         }
-
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new StatusPlaceholder(this).register();
+        }
         getServer().getPluginManager().registerEvents( new Handler(), this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
-        //getServer().getPluginManager().registerEvents(new Agreement(),this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
         logger.info("AuthAnvilLogin enabled");

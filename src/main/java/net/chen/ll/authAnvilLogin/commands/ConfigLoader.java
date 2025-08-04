@@ -2,7 +2,6 @@ package net.chen.ll.authAnvilLogin.commands;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
-import net.chen.ll.authAnvilLogin.core.CustomConfig;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -14,10 +13,11 @@ import java.util.logging.Logger;
 import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class ConfigLoader {
-    public static Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
-    public static Configuration config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
+    public static Logger logger= AuthAnvilLogin.instance.getLogger();
+    public static Configuration config = AuthAnvilLogin.instance.getConfig();
     public static void loadConfig() {
-        config = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getConfig();
+        config = AuthAnvilLogin.instance.getConfig();
+        AuthAnvilLogin.instance.reloadConfig();
         boolean isConfigValid = true;
         try {
             prefix = config.getString("config.prefix");

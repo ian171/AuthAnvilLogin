@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class Handler implements Listener {
-    public Logger logger= AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
+    public Logger logger= AuthAnvilLogin.instance.getLogger();
     public static AuthMeApi api = AuthAnvilLogin.api;
     public static final String[] subCommands = {"reload","list"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
