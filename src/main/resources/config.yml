@@ -9,6 +9,7 @@ config:
   enableAgreement: true
   delay-time: 45L
   close-kick: true
+  usePasswdGen: false
 materials:
   login:
     left: "PAPER"

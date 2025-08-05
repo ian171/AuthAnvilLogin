@@ -31,6 +31,7 @@ public class ConfigLoader {
             enableAgreement = config.getBoolean("config.enableAgreement");
             agreements = config.getStringList("agreement");
             link = config.getString("messages.link");
+            isUsedPasswdGen = config.getBoolean("config.usePasswdGen");
             if (isDebug) {
                 logger.warning("You are using unsupported functions,We do not recommend you to do that!");
                 //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");

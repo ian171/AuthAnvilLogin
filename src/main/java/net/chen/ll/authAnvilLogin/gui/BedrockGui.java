@@ -4,6 +4,7 @@ import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Bed;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.geysermc.cumulus.form.CustomForm;
@@ -16,9 +17,15 @@ import static net.chen.ll.authAnvilLogin.util.ConfigUtil.getMessage;
 public class BedrockGui {
     private static AuthMeApi api;
     private static Logger logger;
-    public BedrockGui(){
+    private static final BedrockGui instance = new BedrockGui();
+    public static BedrockGui getInstance(){
+        return instance;
+    }
+    public void init(){
         api = AuthAnvilLogin.api;
         logger = AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).getLogger();
+    }
+    private BedrockGui(){
     }
 
     public void handleAuthentication(Player player, FloodgatePlayer floodgatePlayer) {
@@ -65,6 +72,7 @@ public class BedrockGui {
 
     private CustomForm.Builder getRegisterForm(Player player) {
         return CustomForm.builder()
+                .label("\n")
                 .label(String.valueOf(Config.agreements))
                 .title(getMessage("reg-title"))
                 .input(getMessage("reg-password-title"), getMessage("reg-password-placeholder"))
@@ -89,7 +97,7 @@ public class BedrockGui {
         }
 
         api.forceRegister(player, password);
-        sendDebugLog(player.getName() + " Registration successful");
+        sendDebugLog(player.getName() + " Registered successful");
     }
 
     private void sendDebugLog(String message) {

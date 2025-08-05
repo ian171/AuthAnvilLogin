@@ -7,6 +7,7 @@ import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.chen.ll.authAnvilLogin.util.ConfigUtil;
+import net.chen.ll.authAnvilLogin.util.PasswordGen;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -61,11 +62,11 @@ public class Handler implements Listener {
             Class.forName("org.geysermc.floodgate.api.FloodgateApi");
             if(player.getClientBrandName().contains("Geyser")){
                 FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
-                new BedrockGui().handleAuthentication(player, floodgatePlayer);
+                BedrockGui.getInstance().handleAuthentication(player, floodgatePlayer);
                 return;
             }
-        } catch (ClassNotFoundException ignored) {
-
+        } catch (ClassNotFoundException e) {
+            logger.warning("The Geyser User has been ignored");
         }
 //        if(player.getClientBrandName().contains("Geyser")){
 ////                api.forceLogin(player);
@@ -190,6 +191,12 @@ public class Handler implements Listener {
                     .onClickAsync((slot, stateSnapshot) -> {
                         if (slot == AnvilGUI.Slot.OUTPUT) {
                             String input = stateSnapshot.getText();
+                            if(isUsedPasswdGen){
+                                player.sendMessage(new PasswordGen().getPasswordAsString());
+                                return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
+
+                                })));
+                            }
                             handleRegistry(player, input);
                         }
                         return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {

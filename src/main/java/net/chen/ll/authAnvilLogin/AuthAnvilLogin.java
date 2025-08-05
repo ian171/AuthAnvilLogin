@@ -35,11 +35,12 @@ public final class AuthAnvilLogin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        if(Bukkit.getBukkitVersion().contains("1.12")){
+        String ver = Bukkit.getBukkitVersion();
+        if(ver.contains("1.12")||ver.contains("1.13")||ver.contains("1.14")||ver.contains("1.15")||ver.contains("1.16")||ver.contains("1.17")||ver.contains("1.18")||ver.contains("1.19")){
             System.err.println("请使用\"1.12special\"版本+java21: https://github.com/ian171/AuthAnvilLogin/releases/");
             System.err.println("Please use \"1.12special\" with java21: https://github.com/ian171/AuthAnvilLogin/releases/");
             Bukkit.getPluginManager().disablePlugin(this);
-            throw new RuntimeException("\rFailed to load Plugins,You're using unsupported version of minecraft");
+            throw new RuntimeException("\rFailed to load Plugins,You're using unsupported version of minecraft:"+ver);
         }
         System.out.println("Self-Examination has been passed");
     }
@@ -75,7 +76,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
             getLogger().warning("The required plugin Floodgate is missing, plugin will not support Bedrock");
             //return;
         }else {
-            new BedrockGui();
+            BedrockGui.getInstance().init();//init
             logger.info("Loaded for Bedrock!!");
         }
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
