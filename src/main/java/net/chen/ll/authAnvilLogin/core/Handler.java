@@ -48,18 +48,16 @@ public class Handler implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-
-
         //if (!floodgateApi.isFloodgatePlayer(player.getUniqueId())) return;
         if(isLeaf()){
             logger.warning("您似乎在不支持的客户端运行该插件,不保证可用性");
         }
-        logger.info("Connected with Bedrock:"+player.getUniqueId());
         try {
             Class.forName("org.geysermc.floodgate.api.FloodgateApi");
             FloodgateApi floodgateApi = FloodgateApi.getInstance();
             if(player.getClientBrandName().contains("Geyser")){
                 FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
+                logger.info("Connected with Bedrock:"+player.getUniqueId());
                 BedrockGui.getInstance().handleAuthentication(player, floodgatePlayer);
                 return;
             }
