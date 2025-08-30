@@ -13,16 +13,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -50,16 +48,16 @@ public class Handler implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        FloodgateApi floodgateApi = FloodgateApi.getInstance();
+
 
         //if (!floodgateApi.isFloodgatePlayer(player.getUniqueId())) return;
-
-        logger.info("Connected with Bedrock:"+player.getUniqueId());
-        if (isDebug) {
-            logger.warning(Boolean.toString(isLeaf()));
+        if(isLeaf()){
+            logger.warning("您似乎在不支持的客户端运行该插件,不保证可用性");
         }
+        logger.info("Connected with Bedrock:"+player.getUniqueId());
         try {
             Class.forName("org.geysermc.floodgate.api.FloodgateApi");
+            FloodgateApi floodgateApi = FloodgateApi.getInstance();
             if(player.getClientBrandName().contains("Geyser")){
                 FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
                 BedrockGui.getInstance().handleAuthentication(player, floodgatePlayer);
@@ -69,7 +67,7 @@ public class Handler implements Listener {
             logger.warning("The Geyser User has been ignored");
         }
 //        if(player.getClientBrandName().contains("Geyser")){
-////                api.forceLogin(player);
+//                api.forceLogin(player);
 //            FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
 //            new KcLoginGui().handleAuthentication(player, floodgatePlayer);
 //            return;
