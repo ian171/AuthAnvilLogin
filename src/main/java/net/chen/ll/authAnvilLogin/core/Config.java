@@ -27,6 +27,7 @@ public final class Config {
     public static boolean closeKick;
     public static List<String> agreements = new ArrayList<>();
     public static boolean isUsedPasswdGen = false;
+    public static List<AnvilSlot> enableSlots = new ArrayList<>();
     private static int ver;
     @Deprecated
     public static boolean isGeyserLoaded = false;

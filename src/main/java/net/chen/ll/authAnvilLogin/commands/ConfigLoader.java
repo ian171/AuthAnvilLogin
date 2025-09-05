@@ -32,15 +32,22 @@ public class ConfigLoader {
             agreements = config.getStringList("agreement");
             link = config.getString("messages.link");
             isUsedPasswdGen = config.getBoolean("config.usePasswdGen");
+
             if (isDebug) {
                 logger.warning("You are using unsupported functions,We do not recommend you to do that!");
                 //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
                 logger.fine("Started!");
             }
             try {
-                Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
-                Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));
-                Config.addItemsMap(AnvilSlot.LOGIN_OUT, Material.matchMaterial(config.getString("materials.login.output")));
+                if (!config.getString("materials.login.left").equalsIgnoreCase("air")) {
+                    Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
+                }else Config.addItemsMap(AnvilSlot.LOGIN_LEFT,Material.AIR);
+                if (!config.getString("materials.login.right").equalsIgnoreCase("air")) {
+                    Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));
+                }else Config.addItemsMap(AnvilSlot.LOGIN_RIGHT,Material.AIR);
+                if (!config.getString("materials.login.output").equalsIgnoreCase("air")) {
+                    Config.addItemsMap(AnvilSlot.LOGIN_OUT, Material.matchMaterial(config.getString("materials.login.output")));
+                }else Config.addItemsMap(AnvilSlot.LOGIN_OUT,Material.AIR);
                 Config.addItemsMap(AnvilSlot.REGISTER_LEFT, Material.matchMaterial(config.getString("materials.register.left")));
                 Config.addItemsMap(AnvilSlot.REGISTER_RIGHT, Material.matchMaterial(config.getString("materials.register.right")));
                 Config.addItemsMap(AnvilSlot.REGISTER_OUT, Material.matchMaterial(config.getString("materials.register.output")));
