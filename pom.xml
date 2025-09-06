@@ -71,6 +71,13 @@
 <!--                                </relocation>-->
                             </relocations>
                             <filters>
+                                <!-- mvn clean package -->
+                                <filter>
+                                    <artifact>net.wesjd:anvilgui</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                    </excludes>
+                                </filter>
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludeDefaults>false</excludeDefaults>
