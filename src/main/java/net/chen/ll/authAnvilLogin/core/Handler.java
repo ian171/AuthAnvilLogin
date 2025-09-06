@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
@@ -95,12 +96,29 @@ public class Handler implements Listener {
     }
 
     public void openLoginUI(Player player) {
+        // 获取VersionAdapter实例
+        VersionAdapter adapter = VersionAdapter.getInstance();
+        
         ItemStack left = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
-        left.getItemMeta().setDisplayName("Help");
+        ItemMeta leftMeta = adapter.createItemMeta(left);
+        if (leftMeta != null) {
+            leftMeta.setDisplayName("Help");
+            left.setItemMeta(leftMeta);
+        }
+        
         ItemStack right = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
-        right.getItemMeta().setDisplayName(ConfigUtil.getMessage("reg-button"));
+        ItemMeta rightMeta = adapter.createItemMeta(right);
+        if (rightMeta != null) {
+            rightMeta.setDisplayName(ConfigUtil.getMessage("reg-button"));
+            right.setItemMeta(rightMeta);
+        }
+        
         ItemStack output = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT));
-        output.getItemMeta().setDisplayName(ConfigUtil.getMessage("login-button"));
+        ItemMeta outputMeta = adapter.createItemMeta(output);
+        if (outputMeta != null) {
+            outputMeta.setDisplayName(ConfigUtil.getMessage("login-button"));
+            output.setItemMeta(outputMeta);
+        }
         try {
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("login-title"))
@@ -173,9 +191,18 @@ public class Handler implements Listener {
             player.sendMessage("You should agree those entries");
         }
         try {
+            // 获取VersionAdapter实例
+            VersionAdapter adapter = VersionAdapter.getInstance();
+            
             ItemStack reg_confirm = new ItemStack(getItemsListMap().get(AnvilSlot.REGISTER_OUT));
-            if (enableAgreement) {
-                reg_confirm.setLore(agreements);
+            ItemMeta regMeta = adapter.createItemMeta(reg_confirm);
+            if (regMeta != null) {
+                regMeta.setDisplayName(ConfigUtil.getMessage("reg-button"));
+                reg_confirm.setItemMeta(regMeta);
+            }
+            if (enableAgreement && regMeta != null) {
+                regMeta.setLore(agreements);
+                reg_confirm.setItemMeta(regMeta);
             }
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("reg-title"))

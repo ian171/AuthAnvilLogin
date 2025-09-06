@@ -1,9 +1,12 @@
 package net.chen.ll.authAnvilLogin;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.core.Handler;
+import net.chen.ll.authAnvilLogin.core.VersionAdapter;
 import net.chen.ll.authAnvilLogin.core.placeholder.StatusPlaceholder;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
@@ -36,13 +39,8 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public void onLoad() {
         String ver = Bukkit.getBukkitVersion();
-        if(ver.contains("1.12")||ver.contains("1.13")||ver.contains("1.14")||ver.contains("1.15")||ver.contains("1.16")||ver.contains("1.17")||ver.contains("1.18")||ver.contains("1.19")){
-            System.err.println("请使用\"1.12special\"版本+java21: https://github.com/ian171/AuthAnvilLogin/releases/");
-            System.err.println("Please use \"1.12special\" with java21: https://github.com/ian171/AuthAnvilLogin/releases/");
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw new RuntimeException("\rFailed to load Plugins,You're using unsupported version of minecraft:"+ver);
-        }
-        System.out.println("Self-Examination has been passed");
+        // 移除版本限制，允许插件在1.19.x版本上运行
+        System.out.println("AuthAnvilLogin loaded on Minecraft version: " + ver);
     }
     private boolean isFloodgateEnabled(String plugin) {
         return !Bukkit.getPluginManager().isPluginEnabled(plugin);
@@ -59,7 +57,18 @@ public final class AuthAnvilLogin extends JavaPlugin {
         ConfigLoader.loadConfig();
         logger = this.getLogger();
         logger.info(version+" Version By Chen");
-        //protocolManager = ProtocolLibrary.getProtocolManager();
+        
+        // 初始化VersionAdapter并检查ProtocolLib
+        try {
+            VersionAdapter adapter = VersionAdapter.getInstance();
+            logger.info("Successfully initialized VersionAdapter for Minecraft " + 
+                        adapter.getMajorVersion() + "." + adapter.getMinorVersion());
+        } catch (Exception e) {
+            logger.severe("Failed to initialize VersionAdapter: " + e.getMessage());
+            logger.severe("Make sure ProtocolLib is installed correctly!");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
             api = AuthMeApi.getInstance();
             if (api == null) {
