@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
+import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.core.placeholder.StatusPlaceholder;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
@@ -13,9 +14,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
@@ -26,12 +36,14 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
     public static String plugin_path ;
-    public static String version = "1.2.2";
+    public static String version = "1.2.5";
+    public static String lastest = "";
     public static AuthAnvilLogin instance;
 
     public AuthAnvilLogin(){
 
     }
+    public static Thread updateChecker;
 
     @Override
     public void onLoad() {
@@ -86,7 +98,34 @@ public final class AuthAnvilLogin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
+        updateChecker = new Thread(() -> {
+            try {
+                URL url = new URL("https://raw.githubusercontent.com/ian171/AuthAnvilLogin/master/version");
+                URLConnection connection = url.openConnection();
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    StringBuilder content = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        content.append(line);
+                    }
+                    lastest = content.toString();
+                }
+                connection = null;
+                System.gc();
+            } catch (IOException e) {
+                logger.severe("Failed to load updater");
+                if(Config.isDebug){
+                    logger.info(e.getMessage());
+                }
+            }
+            if (!Objects.equals(version, lastest)){
+                logger.warning("You can update this plugin!---> https://github.com/ian171/AuthAnvilLogin");
+            }
+        });
         logger.info("AuthAnvilLogin enabled");
+        updateChecker.start();
     }
     @Override
     public void onDisable() {
