@@ -1,12 +1,13 @@
 name: AuthAnvilLogin
 version: '1.2.5-Stable'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
-api-version: '1.12'
+api-version: '1.19'
 load: POSTWORLD
 authors: [ Chen ]
 support-folia: true
 depend:
   - AuthMe
+  - ProtocolLib
 softdepend:
   - PlaceholderAPI
   - floodgate
