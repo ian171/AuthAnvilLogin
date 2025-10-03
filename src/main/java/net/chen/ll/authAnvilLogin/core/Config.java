@@ -18,6 +18,7 @@ public final class Config {
     public static CustomConfig allow_players;
     public static String prefix = "AuthAnvilLogin";
     public static int MAX_ATTEMPTS=3;
+    public static int LOCKOUT_DURATION=300;
     public static boolean isRequestUpper = true;
     public static boolean checkLowestPassword = true;
     public static boolean checkLongestPassword = true;

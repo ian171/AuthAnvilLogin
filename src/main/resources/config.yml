@@ -1,5 +1,8 @@
 ver: 1
+# 最大登录尝试次数
 max-attempts: 3
+# 锁定时长（秒），默认300秒=5分钟
+lockout-duration: 300
 debug: false
 config:
   prefix: AuthAnvilLogin

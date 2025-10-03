@@ -35,7 +35,21 @@ public class Handler implements Listener {
     public static AuthMeApi api = AuthAnvilLogin.api;
     public static final String[] subCommands = {"reload","list","login","register"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
-    private Handler(){}
+    private static LoginAttemptManager attemptManager;
+    private static SecurityManager securityManager;
+
+    private Handler(){
+        attemptManager = new LoginAttemptManager();
+        securityManager = new SecurityManager();
+    }
+
+    /**
+     * 清理过期数据（定时任务调用）
+     */
+    public void cleanupExpiredData() {
+        attemptManager.cleanupExpiredRecords();
+        securityManager.cleanupRateLimits();
+    }
     @Deprecated
     private String randomPasswordGen(int seed){
         double seed2 = (seed * Math.cos(seed)+Math.tan(Math.abs(seed - 0.1)));
@@ -91,7 +105,7 @@ public class Handler implements Listener {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
         loginAttempts.remove(playerUUID);
-        System.gc();
+        // 移除手动GC调用，让JVM自动管理内存
     }
 
     public void openLoginUI(Player player) {
@@ -129,36 +143,76 @@ public class Handler implements Listener {
                     .itemOutput(output) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
-            //logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
-            player.sendMessage("无法打开");
-            throw new AnvilLoadException(e.getMessage());
+            logger.severe("无法打开登录界面: " + e.getMessage());
+            if (isDebug) {
+                e.printStackTrace();
+            }
+            player.sendMessage("登录界面加载失败，请联系管理员");
+            // 不抛出异常，允许玩家重试
         }
     }
 
     private void handleLogin(Player player, String password) {
         UUID playerUUID = player.getUniqueId();
-        int attempts = loginAttempts.getOrDefault(playerUUID, 0);
-        if (attempts >= Config.MAX_ATTEMPTS) {
-            player.sendMessage("你尝试次数过多，请稍后再试！");
-            player.kickPlayer("你已经试了很多次了");
+        String ip = securityManager.getRealIP(player);
+
+        // 速率限制检查
+        if (!securityManager.checkRateLimit(ip)) {
+            player.sendMessage("请求过于频繁，请稍后再试");
+            player.kickPlayer("请求过于频繁");
             return;
         }
-        if (api.isRegistered(player.getName())) {
-            if (api.checkPassword(player.getName(), password)) {
-                api.forceLogin(player);
-                player.sendMessage("登录成功！");
-                if (isDebug) {
-                    logger.warning("Unsupported functions are using");
-                    openAgreement(player);
-                }
-                player.closeInventory();
-            } else {
-                player.sendMessage("密码错误，请重新输入！");
-            }
-        } else {
-            player.sendMessage("你还没有注册，请先注册！");
-            openRegisterUI(player);
+
+        // 检查是否被锁定
+        if (attemptManager.isLockedOut(playerUUID)) {
+            long remaining = attemptManager.getRemainingLockoutTime(playerUUID);
+            player.sendMessage("你已被锁定，请 " + remaining + " 秒后再试");
+            player.kickPlayer("登录失败次数过多，已被锁定");
+            return;
         }
+
+        // 异步验证密码，避免阻塞主线程
+        Bukkit.getScheduler().runTaskAsynchronously(AuthAnvilLogin.instance, () -> {
+            try {
+                if (api.isRegistered(player.getName())) {
+                    boolean passwordValid = api.checkPassword(player.getName(), password);
+
+                    // 回到主线程执行游戏操作
+                    Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                        if (passwordValid) {
+                            api.forceLogin(player);
+                            player.sendMessage("登录成功！");
+                            attemptManager.resetAttempts(playerUUID);
+                            securityManager.logLoginSuccess(player);
+                            if (isDebug) {
+                                logger.warning("Unsupported functions are using");
+                                openAgreement(player);
+                            }
+                            player.closeInventory();
+                        } else {
+                            int attempts = attemptManager.recordFailedAttempt(playerUUID, Config.MAX_ATTEMPTS);
+                            securityManager.logLoginFailure(player, attempts);
+                            int remaining = Config.MAX_ATTEMPTS - attempts;
+                            if (remaining > 0) {
+                                player.sendMessage("密码错误！还剩 " + remaining + " 次机会");
+                            } else {
+                                player.kickPlayer("登录失败次数过多，已被锁定5分钟");
+                            }
+                        }
+                    });
+                } else {
+                    Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                        player.sendMessage("你还没有注册，请先注册！");
+                        openRegisterUI(player);
+                    });
+                }
+            } catch (Exception e) {
+                logger.severe("密码验证失败: " + e.getMessage());
+                Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                    player.sendMessage("登录验证出错，请重试");
+                });
+            }
+        });
     }
     @Deprecated
     private void openAgreement(Player player){
@@ -201,56 +255,71 @@ public class Handler implements Listener {
 
                     }).open(player);
         } catch (Exception e) {
-            //logger.warning("An error occurred while opening the AnvilGUI: " + e.getMessage());
-
-            player.sendMessage("无法打开");
-            System.gc();
-            throw new AnvilLoadException(e.getMessage());
+            logger.severe("无法打开注册界面: " + e.getMessage());
+            if (isDebug) {
+                e.printStackTrace();
+            }
+            player.sendMessage("注册界面加载失败，请联系管理员");
+            // 不抛出异常，允许玩家重试
         }
     }
     public void handleRegistry(Player player, String password) {
-        if (api.isRegistered(player.getName())) {
-            player.sendMessage("你已经注册了！");
-            player.closeInventory();
+        // 输入验证（主线程）
+        if (password == null || password.isEmpty()) {
+            player.sendMessage("输入不能为空！");
+            openRegisterUI(player);
+            return;
         }
-        else {
-            if (password == null || password.isEmpty()) {
-                player.sendMessage("输入不能为空！");
-                openRegisterUI(player);
-                return;
-            }
-            if (password.length() < 6) {
-                if (checkLowestPassword) {
-                    player.sendMessage("密码长度不能小于6位！");
-                    openRegisterUI(player);
-                    return;
-                }
-            }
-            if (password.length() > 16) {
-                if (checkLongestPassword) {
-                    player.sendMessage("密码长度不能大于16位！");
-                    openRegisterUI(player);
-                    return;
-                }
-            }
-            if (password.contains(" ")) {
-                player.sendMessage("密码不能包含空格！");
-                openRegisterUI(player);
-                return;
-            }
-            if (!isContainUpper(password)) {
-                if (isRequestUpper) {
-                    player.sendMessage("密码未包含大写字母");
-                    openRegisterUI(player);
-                    return;
-                }
-            }
-            api.forceRegister(player, password);
-            api.forceLogin(player);
-            player.sendMessage("注册成功😀！");
-            player.sendMessage("你的密码是:"+password);
-            player.closeInventory();
+        if (password.length() < 6 && checkLowestPassword) {
+            player.sendMessage("密码长度不能小于6位！");
+            openRegisterUI(player);
+            return;
         }
+        if (password.length() > 16 && checkLongestPassword) {
+            player.sendMessage("密码长度不能大于16位！");
+            openRegisterUI(player);
+            return;
+        }
+        if (password.contains(" ")) {
+            player.sendMessage("密码不能包含空格！");
+            openRegisterUI(player);
+            return;
+        }
+        if (!isContainUpper(password) && isRequestUpper) {
+            player.sendMessage("密码未包含大写字母");
+            openRegisterUI(player);
+            return;
+        }
+
+        // 异步注册，避免阻塞主线程
+        Bukkit.getScheduler().runTaskAsynchronously(AuthAnvilLogin.instance, () -> {
+            try {
+                if (api.isRegistered(player.getName())) {
+                    Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                        player.sendMessage("你已经注册了！");
+                        player.closeInventory();
+                    });
+                    return;
+                }
+
+                api.forceRegister(player, password);
+
+                // 回到主线程执行游戏操作
+                Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                    api.forceLogin(player);
+                    player.sendMessage("注册成功😀！");
+                    // 移除密码明文显示，提升安全性
+                    player.closeInventory();
+                    securityManager.logRegistration(player);
+                    logger.info(player.getName() + " 注册成功");
+                });
+            } catch (Exception e) {
+                logger.severe("注册失败: " + e.getMessage());
+                Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                    player.sendMessage("注册出错，请重试");
+                });
+            }
+        });
     }
     public static boolean isContainUpper(String str) {
         for (int i = 0; i < str.length(); i++) {

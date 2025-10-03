@@ -110,8 +110,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
                     }
                     lastest = content.toString();
                 }
-                connection = null;
-                System.gc();
+                // 移除手动GC和null赋值，让JVM自动管理
             } catch (IOException e) {
                 logger.severe("Failed to load updater");
                 if(Config.isDebug){
@@ -122,6 +121,16 @@ public final class AuthAnvilLogin extends JavaPlugin {
                 logger.warning("You can update this plugin!---> https://github.com/ian171/AuthAnvilLogin");
             }
         });
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            try {
+                Handler.getHandler.cleanupExpiredData();
+                logger.info("定时清理任务执行完成");
+            } catch (Exception e) {
+                logger.severe("定时清理任务失败: " + e.getMessage());
+            }
+        }, 20L * 60 * 60, 20L * 60 * 60); // 1小时后启动，每小时执行一次
+
         logger.info("AuthAnvilLogin enabled");
         updateChecker.start();
     }

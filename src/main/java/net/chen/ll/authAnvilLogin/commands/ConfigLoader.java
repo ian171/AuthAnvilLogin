@@ -22,6 +22,7 @@ public class ConfigLoader {
         try {
             prefix = config.getString("config.prefix");
             MAX_ATTEMPTS = config.getInt("max-attempts");
+            LOCKOUT_DURATION = config.getInt("lockout-duration", 300);
             isRequestUpper = config.getBoolean("config.isRequestUpper");
             checkLowestPassword = config.getBoolean("config.checkLowestPassword");
             checkLongestPassword = config.getBoolean("config.checkLongestPassword");
