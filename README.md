@@ -4,11 +4,9 @@
 
 **🔐 创新且安全的 Minecraft 铁砧界面登录插件**
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.20+-green.svg)](https://www.minecraft.net/)
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[English](#english) | [中文](#chinese)
 
 </div>
 
@@ -61,35 +59,6 @@
 
 ---
 
-## 🚀 快速开始
-
-### 安装步骤
-
-1. **下载插件**
-   ```bash
-   # 从 Release 页面下载最新版本
-   wget https://github.com/ian171/AuthAnvilLogin/releases/latest
-   ```
-
-2. **安装依赖**
-   - 确保已安装 AuthMe 插件
-   - （可选）安装 Floodgate 和 Geyser
-
-3. **放置插件**
-   ```bash
-   mv AuthAnvilLogin-*.jar server/plugins/
-   ```
-
-4. **启动服务器**
-   ```bash
-   cd server && ./start.sh
-   ```
-
-5. **配置插件**
-   - 编辑 `plugins/AuthAnvilLogin/config.yml`
-   - 执行 `/al reload` 重载配置
-
----
 
 ## ⚙️ 配置文件
 
@@ -248,17 +217,6 @@ plugins/AuthAnvilLogin/security_audit.log
 **限制**: 每IP每分钟5次请求
 **清理**: 每小时自动清理过期记录
 
-### 3. 异步架构
-
-```
-玩家输入密码
-    ↓
-[主线程] 输入验证
-    ↓
-[异步线程] BCrypt 密码验证
-    ↓
-[主线程] 执行登录/显示错误
-```
 
 ---
 
@@ -291,18 +249,6 @@ plugins/AuthAnvilLogin/security_audit.log
 - 检查 config.yml 中的 materials 配置是否正确
 - 查看日志中的详细错误信息
 - 确保使用的物品类型存在于当前版本
-```
-
-### 调试模式
-
-启用调试输出:
-```yaml
-debug: true
-```
-
-查看详细日志:
-```bash
-tail -f logs/latest.log | grep AuthAnvilLogin
 ```
 
 ---
