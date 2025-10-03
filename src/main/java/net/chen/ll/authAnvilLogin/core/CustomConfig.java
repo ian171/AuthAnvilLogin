@@ -1,5 +1,6 @@
 package net.chen.ll.authAnvilLogin.core;
 
+import jdk.jfr.Unsigned;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;

@@ -66,7 +66,7 @@ public class SecurityManager {
      */
     public String getRealIP(Player player) {
         String ip = player.getAddress().getAddress().getHostAddress();
-
+        //TODO
         // 检查 X-Forwarded-For 头（如果通过代理）
         // Paper API 不直接支持，需要配合网关使用
 

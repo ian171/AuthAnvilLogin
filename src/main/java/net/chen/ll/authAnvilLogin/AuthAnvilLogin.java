@@ -45,20 +45,36 @@ public final class AuthAnvilLogin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        String ver = Bukkit.getBukkitVersion();
-        if(ver.contains("1.12")||ver.contains("1.13")||ver.contains("1.14")||ver.contains("1.15")||ver.contains("1.16")||ver.contains("1.17")||ver.contains("1.18")||ver.contains("1.19")){
-            System.err.println("请使用\"1.12special\"版本+java21: https://github.com/ian171/AuthAnvilLogin/releases/");
-            System.err.println("Please use \"1.12special\" with java21: https://github.com/ian171/AuthAnvilLogin/releases/");
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw new RuntimeException("\rFailed to load Plugins,You're using unsupported version of minecraft:"+ver);
-        }
-        System.out.println("Self-Examination has been passed");
+        updateChecker = new Thread(() -> {
+            try {
+                URL url = new URL("https://raw.githubusercontent.com/ian171/AuthAnvilLogin/master/version");
+                URLConnection connection = url.openConnection();
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    String line;
+                    StringBuilder content = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        content.append(line);
+                    }
+                    lastest = content.toString();
+                }
+                // 移除手动GC和null赋值，让JVM自动管理
+            } catch (IOException e) {
+                logger.severe("Failed to load updater");
+                if(Config.isDebug){
+                    logger.info(e.getMessage());
+                }
+            }
+            if (!Objects.equals(version, lastest)){
+                logger.warning("You can update this plugin!---> https://github.com/ian171/AuthAnvilLogin");
+            }
+        });
+
     }
     private boolean isFloodgateEnabled(String plugin) {
         return !Bukkit.getPluginManager().isPluginEnabled(plugin);
     }
-
-
     //public static ProtocolManager protocolManager;
     @Override
     public void onEnable() {
@@ -96,31 +112,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
-        updateChecker = new Thread(() -> {
-            try {
-                URL url = new URL("https://raw.githubusercontent.com/ian171/AuthAnvilLogin/master/version");
-                URLConnection connection = url.openConnection();
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-                    String line;
-                    StringBuilder content = new StringBuilder();
-                    while ((line = reader.readLine()) != null) {
-                        content.append(line);
-                    }
-                    lastest = content.toString();
-                }
-                // 移除手动GC和null赋值，让JVM自动管理
-            } catch (IOException e) {
-                logger.severe("Failed to load updater");
-                if(Config.isDebug){
-                    logger.info(e.getMessage());
-                }
-            }
-            if (!Objects.equals(version, lastest)){
-                logger.warning("You can update this plugin!---> https://github.com/ian171/AuthAnvilLogin");
-            }
-        });
+
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             try {

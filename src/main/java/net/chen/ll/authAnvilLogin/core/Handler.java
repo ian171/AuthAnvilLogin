@@ -2,7 +2,6 @@ package net.chen.ll.authAnvilLogin.core;
 
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
-import net.chen.ll.authAnvilLogin.exception.AnvilLoadException;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
@@ -20,7 +19,6 @@ import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -50,11 +48,7 @@ public class Handler implements Listener {
         attemptManager.cleanupExpiredRecords();
         securityManager.cleanupRateLimits();
     }
-    @Deprecated
-    private String randomPasswordGen(int seed){
-        double seed2 = (seed * Math.cos(seed)+Math.tan(Math.abs(seed - 0.1)));
-        return String.valueOf(Math.abs((Math.random()*seed2)));
-    }
+
     public static boolean isLeaf() {
         return Bukkit.getVersion().toLowerCase().contains("leaf") ||
                 Bukkit.getName().equalsIgnoreCase("leaf");
