@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__promptx__discover",
+      "mcp__promptx__action",
+      "mcp__promptx__recall"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
