@@ -113,4 +113,4 @@ buildNumber.properties
 run/
 
 #AI
-.claude/
+.claude

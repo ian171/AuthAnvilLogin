@@ -33,6 +33,7 @@ public final class Config {
     @Deprecated
     public static boolean isGeyserLoaded = false;
     private static final Map<AnvilSlot, Material> items = new ConcurrentHashMap<>();
+
     public static Map<AnvilSlot ,Material> getItemsListMap(){
         return items;
     }

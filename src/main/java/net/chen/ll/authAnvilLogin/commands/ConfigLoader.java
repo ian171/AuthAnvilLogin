@@ -4,10 +4,14 @@ import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Config.*;
@@ -33,22 +37,21 @@ public class ConfigLoader {
             agreements = config.getStringList("agreement");
             link = config.getString("messages.link");
             isUsedPasswdGen = config.getBoolean("config.usePasswdGen");
-
             if (isDebug) {
                 logger.warning("You are using unsupported functions,We do not recommend you to do that!");
                 //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
                 logger.fine("Started!");
             }
             try {
-                if (!config.getString("materials.login.left").equalsIgnoreCase("air")) {
+                if (!Objects.requireNonNull(config.getString("materials.login.left")).equalsIgnoreCase("air")) {
                     Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
-                }else Config.addItemsMap(AnvilSlot.LOGIN_LEFT,Material.AIR);
+                }else Config.addItemsMap(AnvilSlot.LOGIN_LEFT,Material.BARRIER);
                 if (!config.getString("materials.login.right").equalsIgnoreCase("air")) {
                     Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));
-                }else Config.addItemsMap(AnvilSlot.LOGIN_RIGHT,Material.AIR);
+                }else Config.addItemsMap(AnvilSlot.LOGIN_RIGHT,Material.BARRIER);
                 if (!config.getString("materials.login.output").equalsIgnoreCase("air")) {
                     Config.addItemsMap(AnvilSlot.LOGIN_OUT, Material.matchMaterial(config.getString("materials.login.output")));
-                }else Config.addItemsMap(AnvilSlot.LOGIN_OUT,Material.AIR);
+                }else Config.addItemsMap(AnvilSlot.LOGIN_OUT,Material.BARRIER);
                 Config.addItemsMap(AnvilSlot.REGISTER_LEFT, Material.matchMaterial(config.getString("materials.register.left")));
                 Config.addItemsMap(AnvilSlot.REGISTER_RIGHT, Material.matchMaterial(config.getString("materials.register.right")));
                 Config.addItemsMap(AnvilSlot.REGISTER_OUT, Material.matchMaterial(config.getString("materials.register.output")));

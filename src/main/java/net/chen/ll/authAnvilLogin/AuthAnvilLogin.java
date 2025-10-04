@@ -79,6 +79,8 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        saveConfig();
         instance = this;
         runtime = System.getProperty("user.dir");
         plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
