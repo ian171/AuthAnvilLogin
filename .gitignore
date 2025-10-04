@@ -113,4 +113,5 @@ buildNumber.properties
 run/
 
 #AI
-.claude
+.claude/
+.claude/settings.local.json
