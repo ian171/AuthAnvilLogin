@@ -7,6 +7,7 @@ import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.chen.ll.authAnvilLogin.util.ConfigUtil;
 import net.chen.ll.authAnvilLogin.util.PasswordGen;
+import net.kyori.adventure.text.Component;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -15,10 +16,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -104,11 +107,16 @@ public class Handler implements Listener {
 
     public void openLoginUI(Player player) {
         ItemStack left = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
-        left.getItemMeta().setDisplayName("Help");
+        ItemMeta leftItemMeta = left.getItemMeta();
+        leftItemMeta.displayName(Component.text(ConfigUtil.getMessage("login-button")));
+        left.setItemMeta(leftItemMeta);
         ItemStack right = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
-        right.getItemMeta().setDisplayName(ConfigUtil.getMessage("reg-button"));
+        ItemMeta rightItemMeta = right.getItemMeta();
+        rightItemMeta.displayName(Component.text(ConfigUtil.getMessage("reg-button")));
+        right.setItemMeta(rightItemMeta);
         ItemStack output = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT));
-        output.getItemMeta().setDisplayName(ConfigUtil.getMessage("login-button"));
+        ItemMeta outputItemMeta = output.getItemMeta();
+        outputItemMeta.displayName(Component.text(ConfigUtil.getMessage("login-button")));
         try {
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("login-title"))
@@ -223,6 +231,8 @@ public class Handler implements Listener {
         try {
             ItemStack reg_confirm = new ItemStack(getItemsListMap().get(AnvilSlot.REGISTER_OUT));
             if (enableAgreement) {
+                //ItemMeta  meta = reg_confirm.getItemMeta();
+                //meta.lore((List<? extends Component>) List.of(agreements));
                 reg_confirm.setLore(agreements);
             }
             new AnvilGUI.Builder()
