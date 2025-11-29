@@ -5,7 +5,7 @@
 **🔐 创新且安全的 Minecraft 铁砧界面登录插件**
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-GNU-blue.svg)](LICENSE)
 
 
 </div>
@@ -49,7 +49,7 @@
 ### 必需依赖
 - **Minecraft**: 1.20+
 - **Java**: 21
-- **Paper/Spigot**: 最新版本
+- **Paper/Spigot**: 最新版本(目前不支持Leaf) [#Issues](https://github.com/ian171/AuthAnvilLogin/issues/9)
 - **AuthMe**: 5.6.1+
 
 ### 可选依赖
