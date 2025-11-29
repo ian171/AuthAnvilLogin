@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 
@@ -34,7 +35,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
     public static String plugin_path ;
-    public static String version = "2.1";
+    public static String version = "2.2";
     public static String lastest = "";
     public static AuthAnvilLogin instance;
 
@@ -42,35 +43,53 @@ public final class AuthAnvilLogin extends JavaPlugin {
 
     }
     public static Thread updateChecker;
-
-    @Override
-    public void onLoad() {
-        updateChecker = new Thread(() -> {
+    public void checkUpdate(){
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
             try {
                 URL url = new URL("https://raw.githubusercontent.com/ian171/AuthAnvilLogin/master/version");
                 URLConnection connection = url.openConnection();
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-                    String line;
-                    StringBuilder content = new StringBuilder();
-                    while ((line = reader.readLine()) != null) {
-                        content.append(line);
-                    }
-                    lastest = content.toString();
+
+                String latest;
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                    latest = reader.lines().collect(Collectors.joining());
                 }
-                // 移除手动GC和null赋值，让JVM自动管理
+
+                String currentVersion = this.getPluginMeta().getVersion();
+
+                if (!Objects.equals(currentVersion, latest)) {
+                    this.getLogger().warning("A new version is available: " + latest);
+                    this.getLogger().warning("Download: https://github.com/ian171/AuthAnvilLogin");
+                }
+
             } catch (IOException e) {
-                logger.severe("Failed to load updater");
-                if(Config.isDebug){
-                    logger.info(e.getMessage());
+                this.getLogger().warning("Failed to check for updates");
+                if (Config.isDebug) {
+                    logger.severe(e.getMessage());
                 }
-            }
-            if (!Objects.equals(version, lastest)){
-                logger.warning("You can update this plugin!---> https://github.com/ian171/AuthAnvilLogin");
             }
         });
+    }
 
+    public boolean isUnsupported(){
+        boolean isLeaf =  Bukkit.getName().equalsIgnoreCase("Leaf");
+        try {
+            Class.forName("com.leafmc.server.LeafConfig");
+            return isLeaf;// 找到了Leaf特有类
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void onLoad() {
+        checkUpdate();
+        if (isUnsupported()){
+            getLogger().severe("当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
     private boolean isFloodgateEnabled(String plugin) {
         return !Bukkit.getPluginManager().isPluginEnabled(plugin);
