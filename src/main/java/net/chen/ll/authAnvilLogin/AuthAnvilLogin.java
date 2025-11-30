@@ -145,7 +145,6 @@ public final class AuthAnvilLogin extends JavaPlugin {
         }, 20L * 60 * 60, 20L * 60 * 60); // 1小时后启动，每小时执行一次
 
         logger.info("AuthAnvilLogin enabled");
-        updateChecker.start();
     }
     @Override
     public void onDisable() {
