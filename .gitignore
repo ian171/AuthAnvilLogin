@@ -115,3 +115,5 @@ run/
 #AI
 .claude/
 .claude/settings.local.json
+
+.gradle/*
