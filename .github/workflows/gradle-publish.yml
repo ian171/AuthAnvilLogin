@@ -30,9 +30,9 @@ jobs:
     - name: Grant execute permission to Gradle wrapper
       run: chmod +x ./gradlew
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      uses: gradle/gradle-build-action@v2  
     - name: Set Gradle-Wrapper
-      run: ./gradle wrapper
+      run: ./gradlew wrapper
     - name: Build with Gradle
       run: ./gradlew build shadowJar
 
