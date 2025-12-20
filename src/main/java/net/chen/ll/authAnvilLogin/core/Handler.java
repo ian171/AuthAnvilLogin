@@ -81,9 +81,9 @@ public class Handler implements Listener {
 //            new KcLoginGui().handleAuthentication(player, floodgatePlayer);
 //            return;
 //        }
-
         try {
             if (api.isRegistered(player.getName())) {
+                if(api.isAuthenticated(player)) return;
                 openLoginUI(player);
                 if (isDebug){
                     logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
