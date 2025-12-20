@@ -8,6 +8,7 @@ import net.chen.ll.authAnvilLogin.core.Handler;
 import net.chen.ll.authAnvilLogin.core.placeholder.StatusPlaceholder;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
+import net.chen.ll.authAnvilLogin.util.SchedulerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -44,7 +45,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     }
     public static Thread updateChecker;
     public void checkUpdate(){
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        SchedulerUtil.runAsyncOnce(this, () -> {
             try {
                 URL url = new URL("https://raw.githubusercontent.com/ian171/AuthAnvilLogin/master/version");
                 URLConnection connection = url.openConnection();
@@ -85,7 +86,6 @@ public final class AuthAnvilLogin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        checkUpdate();
         if (isUnsupported()){
             getLogger().severe("当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
             getServer().getPluginManager().disablePlugin(this);
@@ -97,6 +97,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     //public static ProtocolManager protocolManager;
     @Override
     public void onEnable() {
+        checkUpdate();
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         saveConfig();
@@ -135,7 +136,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         this.getCommand("anvillogin").setTabCompleter(this);
 
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        SchedulerUtil.runAsyncRepeating(this, () -> {
             try {
                 Handler.getHandler.cleanupExpiredData();
                 logger.info("定时清理任务执行完成");

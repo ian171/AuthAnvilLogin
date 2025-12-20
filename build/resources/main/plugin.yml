@@ -4,7 +4,7 @@ main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
 api-version: '1.12'
 load: POSTWORLD
 authors: [ Chen ]
-support-folia: true
+folia-supported: true
 depend:
   - AuthMe
 softdepend:
