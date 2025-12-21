@@ -17,8 +17,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    #permissions:
+    #  contents: read
 
     steps:
     - uses: actions/checkout@v4
@@ -32,6 +32,9 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+    # 3. 确保 gradlew 文件有执行权限 
+    - name: Grant execute permission to gradlew
+      run: chmod +x ./gradlew
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
