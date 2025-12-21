@@ -1,0 +1,50 @@
+name: Build and Output Artifact
+
+# 触发工作流的事件：每次提交都会触发
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # 允许手动触发
+
+# 运行环境
+jobs:
+  build:
+    # 使用的虚拟环境类型
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # 2. 设置 JDK 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+
+      # 3. 使用 Gradle 构建项目
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      # 4. 输出构建产物到工作目录（不上传到 GitHub Release）
+      - name: Archive build artifacts
+        run: |
+          mkdir -p artifacts
+          cp build/libs/*.jar artifacts/
+        
+      # 5. 上传编译产物（构建后的 jar 文件）到 GitHub Actions 构建工件（Artifacts）
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: compiled-jar
+          path: artifacts/*.jar
+
+      # 6. 可选：显示构建产物文件
+      - name: List build artifacts
+        run: ls -la artifacts
