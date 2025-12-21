@@ -7,6 +7,7 @@ import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.chen.ll.authAnvilLogin.util.ConfigUtil;
 import net.chen.ll.authAnvilLogin.util.PasswordGen;
+import net.chen.ll.authAnvilLogin.util.SchedulerUtil;
 import net.kyori.adventure.text.Component;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -82,20 +83,45 @@ public class Handler implements Listener {
 //            return;
 //        }
         try {
-            if (api.isRegistered(player.getName())) {
-                if(api.isAuthenticated(player)) return;
-                openLoginUI(player);
-                if (isDebug){
-                    logger.info(player.getName()+" is logged in"+",opened AnvilGUI:"+api.getLastLoginTime(player.getName()));
+            // 在玩家区域线程中延迟执行，等待 AuthMe 自动登录完成
+            player.getScheduler().runDelayed(AuthAnvilLogin.instance, task -> {
+
+                // 已注册玩家
+                if (api.isRegistered(player.getName())) {
+
+                    // AuthMe 已认证（包括自动登录 / 跨服）
+                    if (api.isAuthenticated(player)) {
+                        if (isDebug) {
+                            logger.info(player.getName() + " already authenticated by AuthMe, skip AnvilGUI");
+                        }
+                        return;
+                    }
+
+                    // 未登录 → 打开登录 UI
+                    openLoginUI(player);
+
+                    if (isDebug) {
+                        logger.info(
+                                player.getName()
+                                        + " not authenticated, opened AnvilGUI, lastLogin="
+                                        + api.getLastLoginTime(player.getName())
+                        );
+                    }
+
+                } else {
+                    // 新玩家 → 注册流程
+                    player.sendMessage("§e检测到你是第一次来到服务器，请先注册账号");
+                    logger.info(player.getName() + " is new with " + player.getClientBrandName());
+
+                    openRegisterUI(player);
                 }
-            }else {
-                player.sendMessage("检测到你是第一次来服务器,", "请先注册账号");
-                logger.info(player.getName()+" is new with "+player.getClientBrandName());
-                openRegisterUI(player);
-            }
+
+            },null,10L); // 延迟 10 ticks（0.5 秒）
+
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            logger.severe("AuthAnvilLogin error: " + e.getMessage());
         }
+
     }
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -174,23 +200,25 @@ public class Handler implements Listener {
         }
 
         // 异步验证密码，避免阻塞主线程
-        Bukkit.getScheduler().runTaskAsynchronously(AuthAnvilLogin.instance, () -> {
+        SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
             try {
                 if (api.isRegistered(player.getName())) {
                     boolean passwordValid = api.checkPassword(player.getName(), password);
 
                     // 回到主线程执行游戏操作
-                    Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                    SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                         if (passwordValid) {
                             api.forceLogin(player);
-                            player.sendMessage("登录成功！");
                             attemptManager.resetAttempts(playerUUID);
                             securityManager.logLoginSuccess(player);
                             if (isDebug) {
                                 logger.warning("Unsupported functions are using");
                                 openAgreement(player);
                             }
-                            player.closeInventory();
+                            player.getScheduler().run(AuthAnvilLogin.instance, task -> {
+                                player.closeInventory();
+                                player.sendMessage("§a登录成功！");
+                            }, null);
                         } else {
                             int attempts = attemptManager.recordFailedAttempt(playerUUID, Config.MAX_ATTEMPTS);
                             securityManager.logLoginFailure(player, attempts);
@@ -203,14 +231,14 @@ public class Handler implements Listener {
                         }
                     });
                 } else {
-                    Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                    SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                         player.sendMessage("你还没有注册，请先注册！");
                         openRegisterUI(player);
                     });
                 }
             } catch (Exception e) {
                 logger.severe("密码验证失败: " + e.getMessage());
-                Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                     player.sendMessage("登录验证出错，请重试");
                 });
             }
@@ -296,7 +324,7 @@ public class Handler implements Listener {
         }
 
         // 异步注册，避免阻塞主线程
-        Bukkit.getScheduler().runTaskAsynchronously(AuthAnvilLogin.instance, () -> {
+        SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
             try {
                 if (api.isRegistered(player.getName())) {
                     Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
@@ -313,7 +341,9 @@ public class Handler implements Listener {
                     api.forceLogin(player);
                     player.sendMessage("注册成功😀！");
                     // 移除密码明文显示，提升安全性
-                    player.closeInventory();
+                    player.getScheduler().run(AuthAnvilLogin.instance, task -> {
+                        player.closeInventory();
+                    },null);
                     securityManager.logRegistration(player);
                     logger.info(player.getName() + " 注册成功");
                 });
