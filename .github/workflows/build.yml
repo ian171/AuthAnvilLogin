@@ -40,7 +40,7 @@ jobs:
         
       # 5. 上传编译产物（构建后的 jar 文件）到 GitHub Actions 构建工件（Artifacts）
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: compiled-jar
           path: artifacts/*.jar
