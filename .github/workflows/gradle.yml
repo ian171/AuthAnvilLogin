@@ -35,6 +35,16 @@ jobs:
     # 3. 确保 gradlew 文件有执行权限 
     - name: Grant execute permission to gradlew
       run: chmod +x ./gradlew
+    # 4. 如果 gradle-wrapper.jar 不存在，则运行 gradle wrapper 来生成它
+    - name: Generate Gradle Wrapper if missing
+      run: |
+        if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+          echo "gradle-wrapper.jar not found, generating it."
+          ./gradlew wrapper
+        else
+          echo "gradle-wrapper.jar already exists."
+        fi
+
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
