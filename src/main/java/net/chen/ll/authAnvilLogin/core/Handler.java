@@ -337,7 +337,7 @@ public class Handler implements Listener {
                 api.forceRegister(player, password);
 
                 // 回到主线程执行游戏操作
-                Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                     api.forceLogin(player);
                     player.sendMessage("注册成功😀！");
                     // 移除密码明文显示，提升安全性
@@ -349,7 +349,7 @@ public class Handler implements Listener {
                 });
             } catch (Exception e) {
                 logger.severe("注册失败: " + e.getMessage());
-                Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                     player.sendMessage("注册出错，请重试");
                 });
             }

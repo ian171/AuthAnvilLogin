@@ -3,10 +3,8 @@ package net.chen.ll.authAnvilLogin.gui;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
-import org.bukkit.Bukkit;
-import org.bukkit.block.Bed;
+import net.chen.ll.authAnvilLogin.util.SchedulerUtil;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.geysermc.cumulus.form.CustomForm;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
@@ -37,15 +35,21 @@ public class BedrockGui {
     }
 
     private void sendFormWithDelay(Player player, FloodgatePlayer floodgatePlayer, CustomForm.Builder formBuilder) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!api.isAuthenticated(player)) {
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                if (!api.isAuthenticated(player)) {
+//                    floodgatePlayer.sendForm(formBuilder.build());
+//                    sendDebugLog(player.getName() + " Window " + formBuilder + " has been sent");
+//                }
+//            }
+//        }.runTaskLater(AuthAnvilLogin.instance, Config.delaytime);
+        SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
+            if (!api.isAuthenticated(player)) {
                     floodgatePlayer.sendForm(formBuilder.build());
                     sendDebugLog(player.getName() + " Window " + formBuilder + " has been sent");
                 }
-            }
-        }.runTaskLater(AuthAnvilLogin.instance, Config.delaytime);
+        });
     }
 
     private CustomForm.Builder getLoginForm(Player player) {

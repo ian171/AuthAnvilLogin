@@ -90,6 +90,8 @@ public final class AuthAnvilLogin extends JavaPlugin {
             getLogger().severe("当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
             getServer().getPluginManager().disablePlugin(this);
         }
+        runtime = System.getProperty("user.dir");
+        plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
     }
     private boolean isFloodgateEnabled(String plugin) {
         return !Bukkit.getPluginManager().isPluginEnabled(plugin);
@@ -102,8 +104,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveConfig();
         instance = this;
-        runtime = System.getProperty("user.dir");
-        plugin_path = runtime + "\\plugins\\AuthAnvilLogin\\";
+
         ConfigLoader.loadConfig();
         logger = this.getLogger();
         logger.info(version+" Version By Chen");
