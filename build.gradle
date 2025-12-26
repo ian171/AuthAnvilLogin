@@ -50,6 +50,7 @@ dependencies {
     compileOnly libs.me.clip.placeholderapi
     compileOnly libs.org.geysermc.geyser.api
     compileOnly libs.org.geysermc.floodgate.api
+    implementation 'com.google.code.gson:gson:2.13.2'  // 请使用最新版本
 }
 
 

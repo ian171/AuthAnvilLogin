@@ -4,10 +4,7 @@ import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
-import net.chen.ll.authAnvilLogin.util.AnvilSlot;
-import net.chen.ll.authAnvilLogin.util.ConfigUtil;
-import net.chen.ll.authAnvilLogin.util.PasswordGen;
-import net.chen.ll.authAnvilLogin.util.SchedulerUtil;
+import net.chen.ll.authAnvilLogin.util.*;
 import net.kyori.adventure.text.Component;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -60,7 +57,18 @@ public class Handler implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        //if (!floodgateApi.isFloodgatePlayer(player.getUniqueId())) return;
+        if(MojangAPI.isFastLoginLoaded()){
+            api.forceLogin(player);
+            return;
+        }
+        if(MojangAPI.isPremiumPlayer(player)){
+            if (isDebug) {
+                logger.info(player.getName() + " is premium player, skip AnvilGUI");
+            }
+            api.forceLogin(player);
+            return;
+        }
+//        if (!floodgateApi.isFloodgatePlayer(player.getUniqueId())) return;
         if(isLeaf()){
             logger.warning("您似乎在不支持的客户端运行该插件,不保证可用性");
         }
@@ -83,40 +91,33 @@ public class Handler implements Listener {
 //            return;
 //        }
         try {
-            // 在玩家区域线程中延迟执行，等待 AuthMe 自动登录完成
-            player.getScheduler().runDelayed(AuthAnvilLogin.instance, task -> {
+            if (api.isRegistered(player.getName())) {
 
-                // 已注册玩家
-                if (api.isRegistered(player.getName())) {
-
-                    // AuthMe 已认证（包括自动登录 / 跨服）
-                    if (api.isAuthenticated(player)) {
-                        if (isDebug) {
-                            logger.info(player.getName() + " already authenticated by AuthMe, skip AnvilGUI");
-                        }
-                        return;
-                    }
-
-                    // 未登录 → 打开登录 UI
-                    openLoginUI(player);
-
+                // AuthMe 已认证（包括自动登录 / 跨服）
+                if (api.isAuthenticated(player)) {
                     if (isDebug) {
-                        logger.info(
-                                player.getName()
-                                        + " not authenticated, opened AnvilGUI, lastLogin="
-                                        + api.getLastLoginTime(player.getName())
-                        );
+                        logger.info(player.getName() + " already authenticated by AuthMe, skip AnvilGUI");
                     }
-
-                } else {
-                    // 新玩家 → 注册流程
-                    player.sendMessage("§e检测到你是第一次来到服务器，请先注册账号");
-                    logger.info(player.getName() + " is new with " + player.getClientBrandName());
-
-                    openRegisterUI(player);
+                    return;
                 }
 
-            },null,10L); // 延迟 10 ticks（0.5 秒）
+                // 未登录 → 打开登录 UI
+                openLoginUI(player);
+
+                if (isDebug) {
+                    logger.info(
+                            player.getName()
+                                    + " not authenticated, opened AnvilGUI, lastLogin="
+                                    + api.getLastLoginTime(player.getName())
+                    );
+                }
+
+            } else {
+                // 新玩家 → 注册流程
+                player.sendMessage("§e检测到你是第一次来到服务器，请先注册账号");
+                logger.info(player.getName() + " is new with " + player.getClientBrandName());
+                openRegisterUI(player);
+            }
 
         } catch (Exception e) {
             logger.severe("AuthAnvilLogin error: " + e.getMessage());
@@ -132,23 +133,23 @@ public class Handler implements Listener {
     }
 
     public void openLoginUI(Player player) {
-        ItemStack left = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
-        ItemMeta leftItemMeta = left.getItemMeta();
-        leftItemMeta.displayName(Component.text(ConfigUtil.getMessage("login-button")));
-        left.setItemMeta(leftItemMeta);
-        ItemStack right = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
-        ItemMeta rightItemMeta = right.getItemMeta();
-        rightItemMeta.displayName(Component.text(ConfigUtil.getMessage("reg-button")));
-        right.setItemMeta(rightItemMeta);
-        ItemStack output = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT));
-        ItemMeta outputItemMeta = output.getItemMeta();
-        outputItemMeta.displayName(Component.text(ConfigUtil.getMessage("login-button")));
+//        ItemStack left = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
+//        ItemMeta leftItemMeta = left.getItemMeta();
+//        leftItemMeta.displayName(Component.text(ConfigUtil.getMessage("login-button")));
+//        left.setItemMeta(leftItemMeta);
+//        ItemStack right = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_LEFT));
+//        ItemMeta rightItemMeta = right.getItemMeta();
+//        rightItemMeta.displayName(Component.text(ConfigUtil.getMessage("reg-button")));
+//        right.setItemMeta(rightItemMeta);
+//        ItemStack output = new ItemStack(Config.getItemsListMap().get(AnvilSlot.LOGIN_OUT));
+//        ItemMeta outputItemMeta = output.getItemMeta();
+//        outputItemMeta.displayName(Component.text(ConfigUtil.getMessage("login-button")));
         try {
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("login-title"))
                     .text("")
-                    .itemLeft(left)
-                    .itemRight(right)
+                    .itemLeft(ItemName.setItemName(AnvilSlot.LOGIN_LEFT, ConfigUtil.getMessage("login-button")))
+                    .itemRight(ItemName.setItemName(AnvilSlot.LOGIN_RIGHT, ConfigUtil.getMessage("reg-button")))
                     .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))// 插件实例
                     .onClickAsync((slot, stateSnapshot) -> {
                         if(slot == AnvilGUI.Slot.INPUT_LEFT){
@@ -168,7 +169,7 @@ public class Handler implements Listener {
                             logger.info(player.getName() + " Done");
                         })));
                     })
-                    .itemOutput(output) // 设置输出物品
+                    .itemOutput(ItemName.setItemName(AnvilSlot.LOGIN_OUT, ConfigUtil.getMessage("login-button"))) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
             logger.severe("无法打开登录界面: " + e.getMessage());
@@ -250,38 +251,31 @@ public class Handler implements Listener {
     }
     public void openRegisterUI(Player player) {
         player.closeInventory();
-        if (enableAgreement){
-            for(int i = 0;i<=agreements.size() - 1;i++){
-                player.sendMessage(agreements.get(i));
-            }
-            player.sendMessage("You should agree those entries");
-        }
         try {
-            ItemStack reg_confirm = new ItemStack(getItemsListMap().get(AnvilSlot.REGISTER_OUT));
-            if (enableAgreement) {
-                //ItemMeta  meta = reg_confirm.getItemMeta();
-                //meta.lore((List<? extends Component>) List.of(agreements));
-                reg_confirm.setLore(agreements);
-            }
+//            ItemStack reg_confirm = new ItemStack(getItemsListMap().get(AnvilSlot.REGISTER_LEFT));
+//            if (enableAgreement) {
+//                ItemMeta meta = reg_confirm.getItemMeta();
+//                meta.lore((List<? extends Component>) List.of(agreements));
+//                reg_confirm.setLore(agreements);
+//            }
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("reg-title"))
-                    .text("")
-                    .itemOutput(reg_confirm)
-                    .plugin(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class))
-                    .itemLeft(new ItemStack(Config.getItemsListMap().get(AnvilSlot.REGISTER_LEFT)))
-                    .itemRight(new ItemStack(Config.getItemsListMap().get(AnvilSlot.REGISTER_RIGHT)))
+                    .text("删除我")
+                    .itemOutput(ItemName.setLore(ItemName.setItemName(AnvilSlot.REGISTER_LEFT, ConfigUtil.getMessage("reg-button")), String.valueOf(agreements)))
+                    .plugin(AuthAnvilLogin.instance)
+                    .itemLeft(ItemName.setItemName(AnvilSlot.REGISTER_RIGHT, ConfigUtil.getMessage("reg-button")))
+                    .itemRight(ItemName.setItemName(AnvilSlot.REGISTER_OUT, ConfigUtil.getMessage("reg-button")))
                     .onClickAsync((slot, stateSnapshot) -> {
                         if (slot == AnvilGUI.Slot.OUTPUT) {
-                            String input = stateSnapshot.getText();
                             if(isUsedPasswdGen){
                                 player.sendMessage(new PasswordGen().getPasswordAsString());
-                                return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
-
+                                return CompletableFuture.completedFuture(List.of(AnvilGUI.ResponseAction.run(() -> {
                                 })));
                             }
+                            String input = stateSnapshot.getText();
                             handleRegistry(player, input);
                         }
-                        return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
+                        return CompletableFuture.completedFuture(List.of(AnvilGUI.ResponseAction.run(() -> {
 
                         })));
 
@@ -297,7 +291,7 @@ public class Handler implements Listener {
     }
     public void handleRegistry(Player player, String password) {
         // 输入验证（主线程）
-        if (password == null || password.isEmpty()) {
+        if (password == null) {
             player.sendMessage("输入不能为空！");
             openRegisterUI(player);
             return;
@@ -340,7 +334,6 @@ public class Handler implements Listener {
                 SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                     api.forceLogin(player);
                     player.sendMessage("注册成功😀！");
-                    // 移除密码明文显示，提升安全性
                     player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         player.closeInventory();
                     },null);
