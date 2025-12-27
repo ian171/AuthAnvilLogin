@@ -1,5 +1,9 @@
 package net.chen.ll.authAnvilLogin.core;
 
+import com.github.games647.fastlogin.bukkit.FastLoginBukkit;
+import com.github.games647.fastlogin.core.PremiumStatus;
+import com.github.games647.fastlogin.core.storage.StoredProfile;
+import fastlogin.config.Configuration;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
@@ -11,10 +15,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
@@ -54,21 +60,28 @@ public class Handler implements Listener {
         return Bukkit.getVersion().toLowerCase().contains("leaf") ||
                 Bukkit.getName().equalsIgnoreCase("leaf");
     }
+//    @EventHandler
+//    public void onProfileLoaded(ProfileLoadedEvent event) {
+//        Player player = event.getPlayer();
+//
+//        if (!authMeApi.isAuthenticated(player)) {
+//            Bukkit.getScheduler().runTask(plugin, () -> {
+//                openLoginUI(player);
+//            });
+//        }
+//    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if(MojangAPI.isFastLoginLoaded()){
-            api.forceLogin(player);
-            return;
+        /**
+         * 我真的不知道怎么修了
+         */
+        //TODO: Fix this
+        if(AuthAnvilLogin.instance.isFastLoginEnabled){
+            logger.severe("FastLogin is enabled, but I still need coder fix the bug!");
         }
-        if(MojangAPI.isPremiumPlayer(player)){
-            if (isDebug) {
-                logger.info(player.getName() + " is premium player, skip AnvilGUI");
-            }
-            api.forceLogin(player);
-            return;
-        }
-//        if (!floodgateApi.isFloodgatePlayer(player.getUniqueId())) return;
+
         if(isLeaf()){
             logger.warning("您似乎在不支持的客户端运行该插件,不保证可用性");
         }
@@ -92,6 +105,7 @@ public class Handler implements Listener {
 //        }
         try {
             if (api.isRegistered(player.getName())) {
+
 
                 // AuthMe 已认证（包括自动登录 / 跨服）
                 if (api.isAuthenticated(player)) {
@@ -187,17 +201,27 @@ public class Handler implements Listener {
 
         // 速率限制检查
         if (!securityManager.checkRateLimit(ip)) {
-            player.sendMessage("请求过于频繁，请稍后再试");
-            player.kickPlayer("请求过于频繁");
-            return;
+            if(api.checkPassword(player.getName(), password)){
+                attemptManager.resetAttempts(playerUUID);
+                securityManager.cleanupRateLimits();
+            }else {
+                player.sendMessage("请求过于频繁，请稍后再试");
+                player.kickPlayer("请求过于频繁");
+                return;
+            }
         }
 
         // 检查是否被锁定
         if (attemptManager.isLockedOut(playerUUID)) {
-            long remaining = attemptManager.getRemainingLockoutTime(playerUUID);
-            player.sendMessage("你已被锁定，请 " + remaining + " 秒后再试");
-            player.kickPlayer("登录失败次数过多，已被锁定");
-            return;
+            if(api.checkPassword(player.getName(), password)){
+                attemptManager.resetAttempts(playerUUID);
+                securityManager.cleanupRateLimits();
+            }else {
+                long remaining = attemptManager.getRemainingLockoutTime(playerUUID);
+                player.sendMessage("你已被锁定，请 " + remaining + " 秒后再试");
+                player.kickPlayer("登录失败次数过多，已被锁定");
+                return;
+            }
         }
 
         // 异步验证密码，避免阻塞主线程

@@ -1,5 +1,6 @@
 package net.chen.ll.authAnvilLogin;
 
+import com.github.games647.fastlogin.bukkit.FastLoginBukkit;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
@@ -38,6 +39,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static String plugin_path ;
     public static String version = "2.2.1";
     public static String lastest = "";
+    public boolean isFastLoginEnabled = false;
     public static AuthAnvilLogin instance;
 
     public AuthAnvilLogin(){
@@ -108,6 +110,10 @@ public final class AuthAnvilLogin extends JavaPlugin {
         ConfigLoader.loadConfig();
         logger = this.getLogger();
         logger.info(version+" Version By Chen");
+        isFastLoginEnabled =  Bukkit.getPluginManager().isPluginEnabled("FastLogin");
+        if(isFastLoginEnabled){
+            Bukkit.getPluginManager().disablePlugin(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("FastLogin")));
+        }
         //protocolManager = ProtocolLibrary.getProtocolManager();
         if (Bukkit.getPluginManager().isPluginEnabled("AuthMe")) {
             api = AuthMeApi.getInstance();

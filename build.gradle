@@ -39,6 +39,10 @@ repositories {
     maven {
         url = uri('https://repo.maven.apache.org/maven2/')
     }
+    maven {
+        name = "codemc-repo"
+        url = "https://repo.codemc.io/repository/maven-public/"
+    }
     gradlePluginPortal()
     maven {url = uri("https://repo.papermc.io/repository/maven-public/")}
 }
@@ -51,6 +55,7 @@ dependencies {
     compileOnly libs.org.geysermc.geyser.api
     compileOnly libs.org.geysermc.floodgate.api
     implementation 'com.google.code.gson:gson:2.13.2'  // 请使用最新版本
+    compileOnly "com.github.games647:fastlogin.bukkit:1.12-SNAPSHOT"
 }
 
 

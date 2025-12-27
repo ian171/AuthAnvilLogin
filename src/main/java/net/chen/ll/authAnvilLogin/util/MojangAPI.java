@@ -65,12 +65,4 @@ public class MojangAPI {
             return false;
         }
     }
-    public static boolean isFastLoginLoaded(){
-        try {
-            Class.forName("com.github.games647.fastlogin.bukkit");
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-        return true;
-    }
 }
