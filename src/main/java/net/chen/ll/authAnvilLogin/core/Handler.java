@@ -284,7 +284,7 @@ public class Handler implements Listener {
 //            }
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("reg-title"))
-                    .text("删除我")
+                    .text("")
                     .itemOutput(ItemName.setLore(ItemName.setItemName(AnvilSlot.REGISTER_LEFT, ConfigUtil.getMessage("reg-button")), String.valueOf(agreements)))
                     .plugin(AuthAnvilLogin.instance)
                     .itemLeft(ItemName.setItemName(AnvilSlot.REGISTER_RIGHT, ConfigUtil.getMessage("reg-button")))
