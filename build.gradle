@@ -62,7 +62,7 @@ dependencies {
 
 
 group = 'net.chen.ll'
-version = '2.2.1-Stable'
+version = '2.2.2-Stable'
 description = 'authanvillogin'
 java.sourceCompatibility = JavaVersion.VERSION_21
 
