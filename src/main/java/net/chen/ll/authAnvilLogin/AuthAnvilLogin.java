@@ -106,9 +106,8 @@ public final class AuthAnvilLogin extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveConfig();
         instance = this;
-
-        ConfigLoader.loadConfig();
         logger = this.getLogger();
+        ConfigLoader.loadConfig();
         logger.info(version+" Version By Chen");
         isFastLoginEnabled =  Bukkit.getPluginManager().isPluginEnabled("FastLogin");
         if(isFastLoginEnabled){

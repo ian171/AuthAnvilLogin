@@ -1,5 +1,6 @@
 package net.chen.ll.authAnvilLogin.util;
 
+import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +11,7 @@ import java.util.logging.Logger;
  * ItemsAdder 兼容性工具类
  */
 public class ItemsAdderHelper {
-    private static final Logger logger = Bukkit.getLogger();
+    private static final Logger logger = AuthAnvilLogin.instance.logger;
     private static boolean itemsAdderEnabled = false;
 
     /**
@@ -21,7 +22,7 @@ public class ItemsAdderHelper {
             Class.forName("dev.lone.itemsadder.api.ItemsAdder");
             itemsAdderEnabled = Bukkit.getPluginManager().isPluginEnabled("ItemsAdder");
             if (itemsAdderEnabled) {
-                logger.info("[AuthAnvilLogin] ItemsAdder 已检测到，自定义物品支持已启用");
+                logger.info("ItemsAdder 已检测到，自定义物品支持已启用");
             }
         } catch (ClassNotFoundException e) {
             itemsAdderEnabled = false;
@@ -57,13 +58,13 @@ public class ItemsAdderHelper {
                 ItemStack customItem = (ItemStack) getCustomItemMethod.invoke(null, itemId);
 
                 if (customItem != null) {
-                    logger.fine("[AuthAnvilLogin] 加载 ItemsAdder 自定义物品: " + itemId);
+                    logger.fine("加载 ItemsAdder 自定义物品: " + itemId);
                     return customItem;
                 } else {
-                    logger.warning("[AuthAnvilLogin] ItemsAdder 自定义物品不存在: " + itemId);
+                    logger.warning("ItemsAdder 自定义物品不存在: " + itemId);
                 }
             } catch (Exception e) {
-                logger.warning("[AuthAnvilLogin] 加载 ItemsAdder 物品失败: " + itemId + " - " + e.getMessage());
+                logger.warning("加载 ItemsAdder 物品失败: " + itemId + " - " + e.getMessage());
             }
         }
 
