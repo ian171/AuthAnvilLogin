@@ -137,7 +137,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new StatusPlaceholder(this).register();
         }
-        getServer().getPluginManager().registerEvents(Handler.getHandler, this);
+        getServer().getPluginManager().registerEvents(Handler.getInstance(), this);
         getServer().getPluginManager().registerEvents(new AccountManagerGui(), this);
         this.getCommand("anvillogin").setExecutor(new AccountSettingCommand());
         this.getCommand("anvillogin").setTabCompleter(this);
@@ -145,7 +145,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
 
         SchedulerUtil.runAsyncRepeating(this, () -> {
             try {
-                Handler.getHandler.cleanupExpiredData();
+                Handler.getInstance().cleanupExpiredData();
                 logger.info("定时清理任务执行完成");
             } catch (Exception e) {
                 logger.severe("定时清理任务失败: " + e.getMessage());

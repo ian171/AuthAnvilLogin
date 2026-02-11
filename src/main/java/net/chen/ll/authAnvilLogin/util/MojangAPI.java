@@ -12,6 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MojangAPI {
+    private static final Gson GSON = new Gson();
+
     public static class MojangPlayer {
         private String id;  // 玩家 UUID
 
@@ -42,17 +44,16 @@ public class MojangAPI {
             }
 
             // 读取返回的 JSON 数据
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
             }
-            reader.close();
 
             // 使用 Gson 解析返回的 JSON 数据
-            Gson gson = new Gson();
-            MojangPlayer playerData = gson.fromJson(response.toString(), MojangPlayer.class);
+            MojangPlayer playerData = GSON.fromJson(response.toString(), MojangPlayer.class);
 
             // 获取 Mojang API 返回的 UUID
             String mojangUUID = playerData != null ? playerData.getId() : null;

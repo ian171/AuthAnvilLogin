@@ -4,7 +4,12 @@
       "mcp__promptx__discover",
       "mcp__promptx__action",
       "mcp__promptx__recall",
-      "mcp__promptx__remember"
+      "mcp__promptx__remember",
+      "Bash(cat:*)",
+      "Bash(./gradlew clean build --no-daemon)",
+      "Bash(chmod:*)",
+      "Bash(./gradlew shadowJar --no-daemon)",
+      "WebFetch(domain:mclo.gs)"
     ],
     "deny": [],
     "ask": []

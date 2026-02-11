@@ -12,9 +12,9 @@ public final class ApiManager {
         authAnvilLogin.logger.info(player.getName()+" opens LoginGui");
 
         if(guiCatagory == GuiCatagory.LOGIN){
-            Handler.getHandler.openLoginUI(player);
+            Handler.getInstance().openLoginUI(player);
         }else if (guiCatagory == GuiCatagory.REGISTER){
-            Handler.getHandler.openRegisterUI(player);
+            Handler.getInstance().openRegisterUI(player);
         }
     }
 

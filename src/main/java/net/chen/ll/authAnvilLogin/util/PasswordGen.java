@@ -9,13 +9,13 @@ public class PasswordGen {
     private static final String lowStr = "abcdefghijklmnopqrstuvwxyz";
     private static final String specialStr = "~!@#$%^&*()_+/-=[]{};:'<>?.";
     private static final String numStr = "0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private String passwd;
 
     // 随机获取字符串字符
     private  char getRandomChar(String str) {
-        SecureRandom random = new SecureRandom();
-        return str.charAt(random.nextInt(str.length()));
+        return str.charAt(RANDOM.nextInt(str.length()));
     }
     // 随机获取小写字符
     private  char getLowChar() {
@@ -61,8 +61,7 @@ public class PasswordGen {
         list.add(getSpecialChar());
 
         for (int i = 4; i < num; i++) {
-            SecureRandom random = new SecureRandom();
-            int funNum = random.nextInt(4);
+            int funNum = RANDOM.nextInt(4);
             list.add(getRandomChar(funNum));
         }
 
@@ -76,10 +75,7 @@ public class PasswordGen {
     }
 
     public String getPasswordAsString(){
-        for (int i = 0; i < 10; i++) {
-            int num = 10;
-            passwd = getRandomPwd(i);
-        }
+        passwd = getRandomPwd(10);
         return passwd;
     }
 }

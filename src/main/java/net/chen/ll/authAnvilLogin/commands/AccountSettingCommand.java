@@ -28,6 +28,7 @@ public class AccountSettingCommand implements CommandExecutor {
             if(strings[0].equals("reload")){
                 AuthAnvilLogin.instance.reloadConfig();
                 ConfigLoader.loadConfig();
+                net.chen.ll.authAnvilLogin.util.ConfigUtil.clearCache();
                 if (Config.isDebug) {
                     Config.allow_players.reload();
                 }
@@ -48,13 +49,13 @@ public class AccountSettingCommand implements CommandExecutor {
             }
             if(strings[0].equals("login")){
                 if(commandSender instanceof Player){
-                    Handler.getHandler.openLoginUI((Player) commandSender);
+                    Handler.getInstance().openLoginUI((Player) commandSender);
                 }
                 return true;
             }
             if(strings[0].equals("register")){
                 if(commandSender instanceof Player){
-                    Handler.getHandler.openRegisterUI((Player) commandSender);
+                    Handler.getInstance().openRegisterUI((Player) commandSender);
                 }
                 return true;
             }

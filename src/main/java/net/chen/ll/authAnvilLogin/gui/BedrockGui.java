@@ -35,15 +35,6 @@ public class BedrockGui {
     }
 
     private void sendFormWithDelay(Player player, FloodgatePlayer floodgatePlayer, CustomForm.Builder formBuilder) {
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                if (!api.isAuthenticated(player)) {
-//                    floodgatePlayer.sendForm(formBuilder.build());
-//                    sendDebugLog(player.getName() + " Window " + formBuilder + " has been sent");
-//                }
-//            }
-//        }.runTaskLater(AuthAnvilLogin.instance, Config.delaytime);
         SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
             if (!api.isAuthenticated(player)) {
                     floodgatePlayer.sendForm(formBuilder.build());
@@ -109,9 +100,4 @@ public class BedrockGui {
             logger.info(message);
         }
     }
-
-//    private String getMessage(String key) {
-//        return ConfigUtil.getMessage(key);
-//        //return ConfigLoader.config.getString("messages." + key, "&cText missing, please check the configuration file.").replace("&", "§");
-//    }
 }
