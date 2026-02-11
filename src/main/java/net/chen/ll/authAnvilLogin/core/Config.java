@@ -2,6 +2,7 @@ package net.chen.ll.authAnvilLogin.core;
 
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,14 +33,25 @@ public final class Config {
     private static int ver;
     @Deprecated
     public static boolean isGeyserLoaded = false;
-    private static final Map<AnvilSlot, Material> items = new ConcurrentHashMap<>();
 
-    public static Map<AnvilSlot ,Material> getItemsListMap(){
+    // 改为存储 ItemStack 而不是 Material，以支持 ItemsAdder 自定义物品
+    private static final Map<AnvilSlot, ItemStack> items = new ConcurrentHashMap<>();
+
+    public static Map<AnvilSlot, ItemStack> getItemsListMap(){
         return items;
     }
-    public static void addItemsMap(@NotNull AnvilSlot s, @NotNull Material material) {
-        items.put(s,material);
+
+    public static void addItemsMap(@NotNull AnvilSlot s, @NotNull ItemStack itemStack) {
+        items.put(s, itemStack);
     }
+
+    /**
+     * 清空物品映射，在重载配置时调用
+     */
+    public static void clearItemsMap() {
+        items.clear();
+    }
+
     public static int getVer() {
         return ver;
     }

@@ -12,15 +12,30 @@ import java.util.List;
 public class ItemName {
     public static ItemStack setItemName(AnvilSlot item, String name){
         if(item==null||name == null) throw new NullPointerException("name can not be null");
-        ItemStack itemStack = new ItemStack(Config.getItemsListMap().get(item));
+
+        // 从 Config 获取 ItemStack（可能是原版物品或 ItemsAdder 自定义物品）
+        ItemStack baseItem = Config.getItemsListMap().get(item);
+        if (baseItem == null) {
+            throw new IllegalStateException("No item configured for slot: " + item);
+        }
+
+        // 克隆 ItemStack 以避免修改原始对象
+        ItemStack itemStack = baseItem.clone();
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.displayName(Component.text(name));
+        if (itemMeta != null) {
+            itemMeta.displayName(Component.text(name));
+            itemStack.setItemMeta(itemMeta);
+        }
         return itemStack;
     }
+
     public static ItemStack setLore(ItemStack itemStack, String lore){
         if(itemStack==null||lore == null) throw new NullPointerException("lore can not be null");
         ItemMeta itemMeta = itemStack.getItemMeta();
-        itemMeta.lore(List.of(Component.text(lore)));
+        if (itemMeta != null) {
+            itemMeta.lore(List.of(Component.text(lore)));
+            itemStack.setItemMeta(itemMeta);
+        }
         return itemStack;
     }
 

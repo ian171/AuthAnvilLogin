@@ -56,6 +56,8 @@
 - **PlaceholderAPI**: 变量支持
 - **Floodgate**: 基岩版玩家支持
 - **Geyser**: 跨平台支持
+- **FastLogin**: 正版玩家自动登录
+- **ItemsAdder**: 自定义物品支持
 
 ---
 
@@ -92,9 +94,12 @@ config:
 # 界面物品配置
 materials:
   login:
-    left: "PAPER"            # 左侧物品（帮助）
+    left: "PAPER"            # 左侧物品（帮助）- 支持原版物品
     right: "REDSTONE"        # 右侧物品（注册）
     output: "ARROW"          # 输出物品（确认）
+    # ItemsAdder 自定义物品示例:
+    # left: "itemsadder:custom_coin"
+    # right: "namespace:custom_item"
   register:
     left: "DIAMOND"
     right: "IRON_INGOT"
@@ -202,7 +207,41 @@ plugins/AuthAnvilLogin/security_audit.log
 
 ## 🔧 高级功能
 
-### 1. 持久化登录计数
+### 1. ItemsAdder 自定义物品
+
+**配置示例**:
+```yaml
+materials:
+  login:
+    left: "itemsadder:ruby"           # ItemsAdder 自定义物品
+    right: "DIAMOND"                   # 原版物品
+    output: "namespace:custom_button"  # 其他命名空间的自定义物品
+```
+
+**特性**:
+- 自动检测 ItemsAdder 插件
+- 支持任意命名空间的自定义物品
+- 完全向后兼容原版物品
+- 加载失败时自动回退到默认物品
+
+**物品ID格式**:
+- 原版物品: `DIAMOND`, `EMERALD`, `PAPER` 等
+- ItemsAdder 物品: `itemsadder:item_id` 或 `namespace:item_id`
+
+### 2. 正版玩家自动登录
+
+**工作原理**:
+1. 玩家加入服务器
+2. FastLogin/AuthMe 自动验证正版账号
+3. AuthAnvilLogin 延迟 2 秒检查认证状态
+4. 如已认证，跳过密码输入界面
+
+**兼容插件**:
+- FastLogin - 正版玩家自动登录
+- AuthMe - 认证后端
+- MMOProfiles - 防止 GUI 冲突
+
+### 3. 持久化登录计数
 
 **文件位置**: `plugins/AuthAnvilLogin/login_attempts.dat`
 
@@ -211,7 +250,7 @@ plugins/AuthAnvilLogin/security_audit.log
 - 自动过期清理（24小时未尝试）
 - 支持锁定时间配置
 
-### 2. IP 速率限制
+### 4. IP 速率限制
 
 **算法**: 滑动窗口
 **限制**: 每IP每分钟5次请求
@@ -249,6 +288,27 @@ plugins/AuthAnvilLogin/security_audit.log
 - 检查 config.yml 中的 materials 配置是否正确
 - 查看日志中的详细错误信息
 - 确保使用的物品类型存在于当前版本
+- 如使用 ItemsAdder 自定义物品，确保格式正确（namespace:item_id）
+```
+
+#### 5. 正版玩家仍需输入密码
+```
+问题: 使用 FastLogin 的正版玩家仍然弹出密码输入窗口
+解决:
+- 确保 FastLogin 插件已正确安装
+- 检查插件加载顺序（AuthAnvilLogin 应在 softdepend 中声明 FastLogin）
+- 查看日志确认是否检测到 FastLogin
+- 尝试重启服务器
+```
+
+#### 6. ItemsAdder 自定义物品不显示
+```
+问题: 配置了 ItemsAdder 物品但显示为默认物品
+解决:
+- 确保 ItemsAdder 插件已安装并启用
+- 检查物品ID格式是否正确（必须包含命名空间，如 itemsadder:custom_coin）
+- 使用 /iaget <item_id> 测试物品是否存在
+- 查看日志中的物品加载信息（开启 debug 模式）
 ```
 
 ---
@@ -289,6 +349,45 @@ lockout-duration: 900
 ---
 
 ## 🔄 更新日志
+
+### v2.2.2-Stable (2025-02-11)
+
+**🎨 新功能**
+- ✨ 新增 ItemsAdder 兼容性支持
+  - 支持在配置文件中使用自定义物品（格式：`namespace:item_id`）
+  - 自动检测 ItemsAdder 插件并启用自定义物品功能
+  - 完全向后兼容原版物品配置
+- ✨ 新增正版玩家自动登录支持
+  - 监听 FastLogin/AuthMe 自动登录事件
+  - 延迟检查机制（2秒），避免时序问题
+  - 事件优先级优化（MONITOR），确保其他插件先处理
+
+**🔧 优化改进**
+- ⚡ 优化配置文件重载逻辑
+  - 重载时自动清空旧配置缓存
+  - 修复物品类型无法更新的问题
+  - 添加详细的配置加载日志
+- ⚡ 改进物品加载系统
+  - 从 Material 改为 ItemStack 存储，支持自定义物品
+  - 添加默认值回退机制
+  - 增强错误处理和日志输出
+- 🛡️ 增强 MMOProfiles 兼容性
+  - 阻止未认证玩家打开其他插件的 GUI
+  - 自动重新打开登录界面
+  - 防止 GUI 被其他插件覆盖
+
+**🐛 Bug 修复**
+- 🐛 修复 PasswordGen 密码生成逻辑错误
+- 🐛 修复 Handler 单例模式命名不规范
+- 🐛 修复 MojangAPI 资源泄漏问题
+- 🐛 修复配置重载后物品类型不更新的问题
+- 🐛 修复正版玩家自动登录后仍弹出密码窗口的问题
+
+**📝 代码质量**
+- 🧹 清理所有注释代码
+- 🔄 优化对象缓存（SecureRandom、Gson）
+- 📊 改进 ConfigUtil 消息缓存机制
+- 🎯 使用 Stream API 优化字符串检查
 
 ### v2.1-Optimized (2025-10-03)
 

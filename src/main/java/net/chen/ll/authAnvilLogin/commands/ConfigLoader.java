@@ -3,15 +3,14 @@ package net.chen.ll.authAnvilLogin.commands;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
+import net.chen.ll.authAnvilLogin.util.ItemsAdderHelper;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Config.*;
@@ -19,9 +18,18 @@ import static net.chen.ll.authAnvilLogin.core.Config.*;
 public class ConfigLoader {
     public static Logger logger= AuthAnvilLogin.instance.getLogger();
     public static Configuration config = AuthAnvilLogin.instance.getConfig();
+
     public static void loadConfig() {
         config = AuthAnvilLogin.instance.getConfig();
         AuthAnvilLogin.instance.reloadConfig();
+
+        // 初始化 ItemsAdder 支持
+        ItemsAdderHelper.initialize();
+
+        // 清空旧的配置缓存
+        Config.clearItemsMap();
+        agreements.clear();
+
         boolean isConfigValid = true;
         try {
             prefix = config.getString("config.prefix");
@@ -42,23 +50,30 @@ public class ConfigLoader {
                 //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
                 logger.fine("Started!");
             }
+
             try {
-                if (!Objects.requireNonNull(config.getString("materials.login.left")).equalsIgnoreCase("air")) {
-                    Config.addItemsMap(AnvilSlot.LOGIN_LEFT, Material.matchMaterial(config.getString("materials.login.left")));
-                }else Config.addItemsMap(AnvilSlot.LOGIN_LEFT,Material.BARRIER);
-                if (!config.getString("materials.login.right").equalsIgnoreCase("air")) {
-                    Config.addItemsMap(AnvilSlot.LOGIN_RIGHT, Material.matchMaterial(config.getString("materials.login.right")));
-                }else Config.addItemsMap(AnvilSlot.LOGIN_RIGHT,Material.BARRIER);
-                if (!config.getString("materials.login.output").equalsIgnoreCase("air")) {
-                    Config.addItemsMap(AnvilSlot.LOGIN_OUT, Material.matchMaterial(config.getString("materials.login.output")));
-                }else Config.addItemsMap(AnvilSlot.LOGIN_OUT,Material.BARRIER);
-                Config.addItemsMap(AnvilSlot.REGISTER_LEFT, Material.matchMaterial(config.getString("materials.register.left")));
-                Config.addItemsMap(AnvilSlot.REGISTER_RIGHT, Material.matchMaterial(config.getString("materials.register.right")));
-                Config.addItemsMap(AnvilSlot.REGISTER_OUT, Material.matchMaterial(config.getString("materials.register.output")));
+                // 登录界面物品配置
+                loadItemConfig("materials.login.left", AnvilSlot.LOGIN_LEFT, "PAPER");
+                loadItemConfig("materials.login.right", AnvilSlot.LOGIN_RIGHT, "DIAMOND");
+                loadItemConfig("materials.login.output", AnvilSlot.LOGIN_OUT, "ARROW");
+
+                // 注册界面物品配置
+                loadItemConfig("materials.register.left", AnvilSlot.REGISTER_LEFT, "PAPER");
+                loadItemConfig("materials.register.right", AnvilSlot.REGISTER_RIGHT, "DIAMOND");
+                loadItemConfig("materials.register.output", AnvilSlot.REGISTER_OUT, "ARROW");
+
+                if (isDebug) {
+                    logger.info("物品类型加载完成:");
+                    for (Map.Entry<AnvilSlot, ItemStack> entry : Config.getItemsListMap().entrySet()) {
+                        logger.info("  " + entry.getKey() + " -> " + entry.getValue().getType());
+                    }
+                }
             } catch (Exception e) {
-                logger.severe("⚠错误的物品属性！❌\n插件已禁用/(ㄒoㄒ)/~~");
+                logger.severe("⚠错误的物品属性！❌");
                 logger.warning(e.getMessage());
-                //AuthAnvilLogin.getPlugin(AuthAnvilLogin.class).setEnabled(false);
+                if (isDebug) {
+                    e.printStackTrace();
+                }
             }
 
             setVer(config.getInt("ver"));
@@ -74,6 +89,47 @@ public class ConfigLoader {
                 for (String key : config.getKeys(false)) {
                     Bukkit.getServer().sendMessage(Component.empty().content(key + ":" + config.get(key)));
                 }
+            }
+        }
+    }
+
+    /**
+     * 加载物品配置，支持原版物品和 ItemsAdder 自定义物品
+     *
+     * @param configPath 配置路径
+     * @param slot 物品槽位
+     * @param defaultItem 默认物品ID
+     */
+    private static void loadItemConfig(String configPath, AnvilSlot slot, String defaultItem) {
+        String itemId = config.getString(configPath, defaultItem);
+
+        // 如果配置为 "air"，使用 BARRIER 作为占位符
+        if (itemId.equalsIgnoreCase("air")) {
+            Config.addItemsMap(slot, new ItemStack(Material.BARRIER));
+            return;
+        }
+
+        // 尝试加载物品（支持原版和 ItemsAdder）
+        ItemStack itemStack = ItemsAdderHelper.getItem(itemId);
+
+        if (itemStack != null) {
+            Config.addItemsMap(slot, itemStack);
+            if (isDebug) {
+                if (itemId.contains(":")) {
+                    logger.info("已加载自定义物品: " + configPath + " = " + itemId);
+                } else {
+                    logger.info("已加载原版物品: " + configPath + " = " + itemId);
+                }
+            }
+        } else {
+            // 物品加载失败，使用默认值
+            logger.warning("无效的物品ID: " + configPath + " = " + itemId + ", 使用默认值: " + defaultItem);
+            ItemStack fallbackItem = ItemsAdderHelper.getItem(defaultItem);
+            if (fallbackItem != null) {
+                Config.addItemsMap(slot, fallbackItem);
+            } else {
+                // 如果默认值也失败，使用 PAPER
+                Config.addItemsMap(slot, new ItemStack(Material.PAPER));
             }
         }
     }
