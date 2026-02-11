@@ -31,7 +31,9 @@ repositories {
     maven {
         url = uri('https://repo.codemc.io/repository/maven-snapshots/')
     }
-
+    maven {
+        url = uri('https://mvn.wesjd.net/')
+    }
     maven {
         url = uri('https://repo.opencollab.dev/main/')
     }
@@ -48,7 +50,7 @@ repositories {
 }
 
 dependencies {
-    api "net.wesjd:anvilgui:1.10.10-SNAPSHOT"
+    api "net.wesjd:anvilgui:1.10.11-SNAPSHOT"
     compileOnly libs.io.papermc.paper.paper.api
     compileOnly libs.fr.xephi.authme
     compileOnly libs.me.clip.placeholderapi
