@@ -119,3 +119,4 @@ run/
 build/
 build/reports
 .gradle
+/.gradle/
