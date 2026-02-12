@@ -54,6 +54,10 @@ public class SecurityManager {
 
         if (!record.isAllowed()) {
             logSecurityEvent("RATE_LIMIT", ip, "请求过于频繁，已阻止");
+            // 通知统计管理器
+            if (Handler.getStatisticsManager() != null) {
+                Handler.getStatisticsManager().recordRateLimit(ip);
+            }
             return false;
         }
 

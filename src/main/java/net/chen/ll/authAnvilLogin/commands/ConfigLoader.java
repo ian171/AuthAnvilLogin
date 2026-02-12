@@ -45,6 +45,12 @@ public class ConfigLoader {
             agreements = config.getStringList("agreement");
             link = config.getString("messages.link");
             isUsedPasswdGen = config.getBoolean("config.usePasswdGen");
+
+            // Web 管理面板配置
+            WEB_ENABLED = config.getBoolean("web.enabled", true);
+            WEB_PORT = config.getInt("web.port", 8080);
+            WEB_TOKEN = config.getString("web.token", generateRandomToken());
+
             if (isDebug) {
                 logger.warning("You are using unsupported functions,We do not recommend you to do that!");
                 //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
@@ -91,6 +97,19 @@ public class ConfigLoader {
                 }
             }
         }
+    }
+
+    /**
+     * 生成随机访问令牌
+     */
+    private static String generateRandomToken() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder token = new StringBuilder();
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < 32; i++) {
+            token.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return token.toString();
     }
 
     /**

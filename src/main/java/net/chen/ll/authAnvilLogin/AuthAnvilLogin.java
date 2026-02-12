@@ -10,6 +10,7 @@ import net.chen.ll.authAnvilLogin.core.placeholder.StatusPlaceholder;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.SchedulerUtil;
+import net.chen.ll.authAnvilLogin.web.WebServer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -41,6 +42,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static String lastest = "";
     public boolean isFastLoginEnabled = false;
     public static AuthAnvilLogin instance;
+    private WebServer webServer;
 
     public AuthAnvilLogin(){
 
@@ -151,11 +153,33 @@ public final class AuthAnvilLogin extends JavaPlugin {
             }
         }, 20L * 60 * 60, 20L * 60 * 60); // 1小时后启动，每小时执行一次
 
+        // 启动 Web 管理面板
+        if (Config.WEB_ENABLED) {
+            try {
+                webServer = new WebServer(Config.WEB_PORT, Handler.getStatisticsManager(), Config.WEB_TOKEN);
+                webServer.startServer();
+                logger.info("========================================");
+                logger.info("Web 管理面板已启动！");
+                logger.info("访问地址: http://localhost:" + Config.WEB_PORT);
+                logger.info("访问令牌: " + Config.WEB_TOKEN);
+                logger.info("使用命令 /al stats 查看详情");
+                logger.info("========================================");
+            } catch (Exception e) {
+                logger.severe("Web 管理面板启动失败: " + e.getMessage());
+            }
+        }
+
         logger.info("AuthAnvilLogin enabled");
     }
     @Override
     public void onDisable() {
         logger.info("AuthAnvilLogin disabling");
+
+        // 停止 Web 服务器
+        if (webServer != null) {
+            webServer.stopServer();
+        }
+
         Handler.api = null;
         Handler.loginAttempts.clear();
         logger.info("AuthAnvilLogin "+version+" disabled");

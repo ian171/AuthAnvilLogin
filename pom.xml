@@ -175,5 +175,11 @@
             <version>2.2.4-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+        <!-- NanoHTTPD - 轻量级 HTTP 服务器 -->
+        <dependency>
+            <groupId>org.nanohttpd</groupId>
+            <artifactId>nanohttpd</artifactId>
+            <version>2.3.1</version>
+        </dependency>
     </dependencies>
 </project>

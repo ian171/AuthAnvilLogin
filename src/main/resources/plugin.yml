@@ -1,5 +1,5 @@
 name: AuthAnvilLogin
-version: '2.2.1-Stable'
+version: '2.2.2-Stable'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
 api-version: '1.12'
 load: POSTWORLD
@@ -17,9 +17,19 @@ website: i.whocare.life
 commands:
   anvillogin:
     description: Open anvil login gui
-    usage: /anvillogin
+    usage: /anvillogin [reload|list|login|register|stats]
     aliases:
       - al
       - avl
     permission-message: &cYou don't have permission to use this command!
 
+permissions:
+  authanvillogin.admin:
+    description: 管理员权限（重载配置、查看列表、查看统计）
+    default: op
+  authanvillogin.use:
+    description: 使用登录功能
+    default: true
+  authanvillogin.stats:
+    description: 查看统计面板信息
+    default: op

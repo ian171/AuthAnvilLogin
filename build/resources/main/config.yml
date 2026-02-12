@@ -4,6 +4,13 @@ max-attempts: 3
 # 锁定时长（秒），默认300秒=5分钟
 lockout-duration: 300
 debug: false
+
+# Web 管理面板配置
+web:
+  enabled: true        # 是否启用 Web 管理面板
+  port: 8080          # Web 服务器端口
+  token: ""           # 访问令牌（留空自动生成）
+
 config:
   prefix: AuthAnvilLogin
   isRequestUpper: true

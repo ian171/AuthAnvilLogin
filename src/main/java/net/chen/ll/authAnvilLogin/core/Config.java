@@ -31,6 +31,12 @@ public final class Config {
     public static boolean isUsedPasswdGen = false;
     public static List<AnvilSlot> enableSlots = new ArrayList<>();
     private static int ver;
+
+    // Web 管理面板配置
+    public static int WEB_PORT = 8080;
+    public static String WEB_TOKEN = "";
+    public static boolean WEB_ENABLED = true;
+
     @Deprecated
     public static boolean isGeyserLoaded = false;
 

@@ -60,7 +60,8 @@ dependencies {
     compileOnly libs.me.clip.placeholderapi
     compileOnly libs.org.geysermc.geyser.api
     compileOnly libs.org.geysermc.floodgate.api
-    implementation 'com.google.code.gson:gson:2.13.2'  // 请使用最新版本
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'  // NanoHTTPD Web 服务器
     compileOnly "com.github.games647:fastlogin.bukkit:1.12-SNAPSHOT"
     compileOnly "com.github.LoneDev6:API-ItemsAdder:3.6.1"
 }

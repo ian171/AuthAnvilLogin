@@ -37,15 +37,21 @@ public class Handler implements Listener {
     public static Handler getInstance() {
         return INSTANCE;
     }
-    public static final String[] subCommands = {"reload","list","login","register"};
+    public static final String[] subCommands = {"reload","list","login","register","stats"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     private static final Map<UUID, Boolean> pendingAuthentication = new ConcurrentHashMap<>();
     private static LoginAttemptManager attemptManager;
     private static SecurityManager securityManager;
+    private static StatisticsManager statisticsManager;
 
     private Handler(){
         attemptManager = new LoginAttemptManager();
         securityManager = new SecurityManager();
+        statisticsManager = new StatisticsManager();
+    }
+
+    public static StatisticsManager getStatisticsManager() {
+        return statisticsManager;
     }
 
     /**
@@ -54,6 +60,7 @@ public class Handler implements Listener {
     public void cleanupExpiredData() {
         attemptManager.cleanupExpiredRecords();
         securityManager.cleanupRateLimits();
+        statisticsManager.cleanupOldData();
     }
 
     public static boolean isLeaf() {
@@ -320,9 +327,14 @@ public class Handler implements Listener {
                     // 回到主线程执行游戏操作
                     SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                         if (passwordValid) {
+                            long loginStartTime = System.currentTimeMillis();
                             api.forceLogin(player);
+                            long loginDuration = System.currentTimeMillis() - loginStartTime;
+
                             attemptManager.resetAttempts(playerUUID);
                             securityManager.logLoginSuccess(player);
+                            statisticsManager.recordLoginSuccess(player, ip, loginDuration);
+
                             if (isDebug) {
                                 logger.warning("Unsupported functions are using");
                                 openAgreement(player);
@@ -334,10 +346,13 @@ public class Handler implements Listener {
                         } else {
                             int attempts = attemptManager.recordFailedAttempt(playerUUID, Config.MAX_ATTEMPTS);
                             securityManager.logLoginFailure(player, attempts);
+                            statisticsManager.recordLoginFailure(player, ip, attempts);
+
                             int remaining = Config.MAX_ATTEMPTS - attempts;
                             if (remaining > 0) {
                                 player.sendMessage("密码错误！还剩 " + remaining + " 次机会");
                             } else {
+                                statisticsManager.recordLockout(player, ip);
                                 player.kickPlayer("登录失败次数过多，已被锁定5分钟");
                             }
                         }
@@ -448,7 +463,10 @@ public class Handler implements Listener {
                     player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         player.closeInventory();
                     },null);
+
+                    String ip = securityManager.getRealIP(player);
                     securityManager.logRegistration(player);
+                    statisticsManager.recordRegistration(player, ip);
                     logger.info(player.getName() + " 注册成功");
                 });
             } catch (Exception e) {
