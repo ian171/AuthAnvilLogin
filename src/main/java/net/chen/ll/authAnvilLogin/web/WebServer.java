@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.iki.elonen.NanoHTTPD;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.StatisticsManager;
 
 import java.io.IOException;
@@ -34,7 +35,9 @@ public class WebServer extends NanoHTTPD {
         String uri = session.getUri();
         Method method = session.getMethod();
 
-        logger.info("Web请求: " + method + " " + uri + " from " + session.getRemoteIpAddress());
+        if (Config.isDebug) {
+            logger.info("Web请求: " + method + " " + uri + " from " + session.getRemoteIpAddress());
+        }
 
         try {
             // 静态资源
