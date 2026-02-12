@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuthAnvil 统计面板</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🔐 AuthAnvil 统计面板</h1>
+                <div class="header-info">
+                    <span class="status-badge online">● 在线</span>
+                    <span id="lastUpdate">最后更新: --</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 认证提示 -->
+        <div id="authPrompt" class="auth-prompt">
+            <div class="auth-box">
+                <h2>🔑 访问验证</h2>
+                <p>请输入访问令牌以继续</p>
+                <input type="password" id="tokenInput" placeholder="输入访问令牌" />
+                <button onclick="authenticate()">验证</button>
+                <p class="hint">提示: 令牌可在服务器控制台查看</p>
+            </div>
+        </div>
+
+        <!-- 主内容 -->
+        <div id="mainContent" style="display: none;">
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card emerald">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-content">
+                        <h3>今日注册</h3>
+                        <p class="stat-value" id="todayRegistrations">0</p>
+                        <p class="stat-label">总注册: <span id="totalRegistrations">0</span></p>
+                    </div>
+                </div>
+
+                <div class="stat-card diamond">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>今日登录</h3>
+                        <p class="stat-value" id="todayLogins">0</p>
+                        <p class="stat-label">总登录: <span id="totalLogins">0</span></p>
+                    </div>
+                </div>
+
+                <div class="stat-card redstone">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-content">
+                        <h3>今日失败</h3>
+                        <p class="stat-value" id="todayFailures">0</p>
+                        <p class="stat-label">总失败: <span id="totalFailures">0</span></p>
+                    </div>
+                </div>
+
+                <div class="stat-card gold">
+                    <div class="stat-icon">🛡️</div>
+                    <div class="stat-content">
+                        <h3>速率限制</h3>
+                        <p class="stat-value" id="todayRateLimits">0</p>
+                        <p class="stat-label">今日触发次数</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 性能指标 -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>👥 总玩家数</h3>
+                    <p class="metric-value" id="totalPlayers">0</p>
+                </div>
+                <div class="metric-card">
+                    <h3>⚡ 平均登录时长</h3>
+                    <p class="metric-value" id="avgLoginTime">0 ms</p>
+                </div>
+                <div class="metric-card">
+                    <h3>📊 登录成功率</h3>
+                    <p class="metric-value" id="successRate">0%</p>
+                </div>
+            </div>
+
+            <!-- 图表区域 -->
+            <div class="chart-section">
+                <div class="chart-card">
+                    <h3>📈 历史趋势（最近7天）</h3>
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 排行榜 -->
+            <div class="leaderboard-section">
+                <h3>🏆 登录排行榜 TOP 10</h3>
+                <div class="table-container">
+                    <table id="playersTable">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>玩家</th>
+                                <th>总登录</th>
+                                <th>失败次数</th>
+                                <th>最后登录</th>
+                                <th>最后IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTableBody">
+                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 安全事件 -->
+            <div class="events-section">
+                <h3>🔒 最近安全事件</h3>
+                <div class="events-container" id="eventsContainer">
+                    <p class="loading">加载中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>AuthAnvilLogin v2.2.2 | Made with ❤️ by Chen</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
