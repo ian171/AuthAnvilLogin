@@ -101,6 +101,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
         return !Bukkit.getPluginManager().isPluginEnabled(plugin);
     }
     //public static ProtocolManager protocolManager;
+    //1
     @Override
     public void onEnable() {
         checkUpdate();
