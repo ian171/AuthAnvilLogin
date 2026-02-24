@@ -13,7 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -31,11 +33,18 @@ import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class Handler implements Listener {
     private static final Handler INSTANCE = new Handler();
-    public Logger logger= AuthAnvilLogin.instance.getLogger();
+    private Logger logger;
     public static AuthMeApi api = AuthAnvilLogin.api;
 
     public static Handler getInstance() {
         return INSTANCE;
+    }
+
+    private Logger getLogger() {
+        if (logger == null) {
+            logger = AuthAnvilLogin.instance.getLogger();
+        }
+        return logger;
     }
     public static final String[] subCommands = {"reload","list","login","register","stats"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
@@ -78,11 +87,11 @@ public class Handler implements Listener {
          */
         //TODO: Fix this
         if(AuthAnvilLogin.instance.isFastLoginEnabled){
-            logger.severe("FastLogin is enabled, but I still need coder fix the bug!");
+            getLogger().severe("FastLogin is enabled, but I still need coder fix the bug!");
         }
 
         if(isLeaf()){
-            logger.warning("您似乎在不支持的客户端运行该插件,不保证可用性");
+            getLogger().warning("您似乎在不支持的客户端运行该插件,不保证可用性");
         }
 
         // 处理基岩版玩家
@@ -91,12 +100,12 @@ public class Handler implements Listener {
             FloodgateApi floodgateApi = FloodgateApi.getInstance();
             if(player.getClientBrandName().contains("Geyser")){
                 FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
-                logger.info("Connected with Bedrock:"+player.getUniqueId());
+                getLogger().info("Connected with Bedrock:"+player.getUniqueId());
                 BedrockGui.getInstance().handleAuthentication(player, floodgatePlayer);
                 return;
             }
         } catch (ClassNotFoundException e) {
-            logger.warning("The Geyser User has been ignored");
+            getLogger().warning("The Geyser User has been ignored");
         }
 
         // 标记玩家为待认证状态
@@ -122,7 +131,7 @@ public class Handler implements Listener {
                 // 检查是否已经被其他方式认证
                 if (!pendingAuthentication.getOrDefault(playerUUID, false)) {
                     if (isDebug) {
-                        logger.info(player.getName() + " authentication already handled by event");
+                        getLogger().info(player.getName() + " authentication already handled by event");
                     }
                     return;
                 }
@@ -152,7 +161,7 @@ public class Handler implements Listener {
         pendingAuthentication.put(playerUUID, false);
 
         if (isDebug) {
-            logger.info(player.getName() + " logged in via AuthMe, skipping AnvilGUI");
+            getLogger().info(player.getName() + " logged in via AuthMe, skipping AnvilGUI");
         }
     }
 
@@ -168,7 +177,7 @@ public class Handler implements Listener {
         pendingAuthentication.put(playerUUID, false);
 
         if (isDebug) {
-            logger.info(player.getName() + " registered via AuthMe, skipping AnvilGUI");
+            getLogger().info(player.getName() + " registered via AuthMe, skipping AnvilGUI");
         }
     }
 
@@ -194,7 +203,7 @@ public class Handler implements Listener {
                 event.setCancelled(true);
 
                 if (isDebug) {
-                    logger.info("Blocked inventory open for unauthenticated player: " + player.getName() + ", title: " + title);
+                    getLogger().info("Blocked inventory open for unauthenticated player: " + player.getName() + ", title: " + title);
                 }
 
                 // 重新打开登录界面
@@ -212,6 +221,47 @@ public class Handler implements Listener {
     }
 
     /**
+     * 强制未认证玩家无法关闭登录界面
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryClose(InventoryCloseEvent event) {
+
+        if (!(event.getPlayer() instanceof Player)) {
+            return;
+        }
+
+        Player player = (Player) event.getPlayer();
+        UUID playerUUID = player.getUniqueId();
+
+        // 如果玩家正在等待认证且尚未通过 AuthMe 认证
+        if (pendingAuthentication.getOrDefault(playerUUID, false) && !api.isAuthenticated(player)) {
+            String title = event.getView().getTitle();
+            if(event.getInventory().getType() == InventoryType.ANVIL){
+                if (title.contains(ConfigUtil.getMessage("login-title")) ||
+                        title.contains(ConfigUtil.getMessage("reg-title"))) {
+
+                    if (isDebug) {
+                        getLogger().info("Player " + player.getName() + " tried to close auth GUI, reopening...");
+                    }
+
+                    // 延迟重新打开界面，避免与关闭事件冲突
+                    Bukkit.getScheduler().runTaskLater(AuthAnvilLogin.instance, () -> {
+                        if (player.isOnline() && !api.isAuthenticated(player)) {
+                            if (api.isRegistered(player.getName())) {
+                                openLoginUI(player);
+                            } else {
+                                openRegisterUI(player);
+                            }
+                        }
+                    }, 2L);
+                }
+            }
+            // 检查关闭的是我们的登录/注册界面
+
+        }
+    }
+
+    /**
      * 处理玩家认证逻辑
      */
     private void handlePlayerAuthentication(Player player) {
@@ -220,7 +270,7 @@ public class Handler implements Listener {
                 // AuthMe 已认证（包括自动登录 / 跨服）
                 if (api.isAuthenticated(player)) {
                     if (isDebug) {
-                        logger.info(player.getName() + " already authenticated by AuthMe, skip AnvilGUI");
+                        getLogger().info(player.getName() + " already authenticated by AuthMe, skip AnvilGUI");
                     }
                     pendingAuthentication.remove(player.getUniqueId());
                     return;
@@ -230,7 +280,7 @@ public class Handler implements Listener {
                 openLoginUI(player);
 
                 if (isDebug) {
-                    logger.info(
+                    getLogger().info(
                             player.getName()
                                     + " not authenticated, opened AnvilGUI, lastLogin="
                                     + api.getLastLoginTime(player.getName())
@@ -240,12 +290,12 @@ public class Handler implements Listener {
             } else {
                 // 新玩家 → 注册流程
                 player.sendMessage("§e检测到你是第一次来到服务器，请先注册账号");
-                logger.info(player.getName() + " is new with " + player.getClientBrandName());
+                getLogger().info(player.getName() + " is new with " + player.getClientBrandName());
                 openRegisterUI(player);
             }
 
         } catch (Exception e) {
-            logger.severe("AuthAnvilLogin error: " + e.getMessage());
+            getLogger().severe("AuthAnvilLogin error: " + e.getMessage());
         } finally {
             pendingAuthentication.remove(player.getUniqueId());
         }
@@ -274,13 +324,13 @@ public class Handler implements Listener {
                         // 处理点击事件
                         return CompletableFuture.completedFuture(Arrays.asList(AnvilGUI.ResponseAction.run(() -> {
                             // 完成时执行的代码
-                            logger.info(player.getName() + " Done");
+                            getLogger().info(player.getName() + " Done");
                         })));
                     })
                     .itemOutput(ItemName.setItemName(AnvilSlot.LOGIN_OUT, ConfigUtil.getMessage("login-button"))) // 设置输出物品
                     .open(player);
         } catch (Exception e) {
-            logger.severe("无法打开登录界面: " + e.getMessage());
+            getLogger().severe("无法打开登录界面: " + e.getMessage());
             if (isDebug) {
                 e.printStackTrace();
             }
@@ -336,7 +386,7 @@ public class Handler implements Listener {
                             statisticsManager.recordLoginSuccess(player, ip, loginDuration);
 
                             if (isDebug) {
-                                logger.warning("Unsupported functions are using");
+                                getLogger().warning("Unsupported functions are using");
                                 openAgreement(player);
                             }
                             player.getScheduler().run(AuthAnvilLogin.instance, task -> {
@@ -364,7 +414,7 @@ public class Handler implements Listener {
                     });
                 }
             } catch (Exception e) {
-                logger.severe("密码验证失败: " + e.getMessage());
+                getLogger().severe("密码验证失败: " + e.getMessage());
                 SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                     player.sendMessage("登录验证出错，请重试");
                 });
@@ -407,7 +457,7 @@ public class Handler implements Listener {
 
                     }).open(player);
         } catch (Exception e) {
-            logger.severe("无法打开注册界面: " + e.getMessage());
+            getLogger().severe("无法打开注册界面: " + e.getMessage());
             if (isDebug) {
                 e.printStackTrace();
             }
@@ -467,10 +517,10 @@ public class Handler implements Listener {
                     String ip = securityManager.getRealIP(player);
                     securityManager.logRegistration(player);
                     statisticsManager.recordRegistration(player, ip);
-                    logger.info(player.getName() + " 注册成功");
+                    getLogger().info(player.getName() + " 注册成功");
                 });
             } catch (Exception e) {
-                logger.severe("注册失败: " + e.getMessage());
+                getLogger().severe("注册失败: " + e.getMessage());
                 SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                     player.sendMessage("注册出错，请重试");
                 });

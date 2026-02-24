@@ -20,9 +20,16 @@ import java.util.logging.Logger;
  */
 public class WebServer extends NanoHTTPD {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private final Logger logger = AuthAnvilLogin.instance.getLogger();
+    private Logger logger;
     private final StatisticsManager statsManager;
     private final String accessToken;
+
+    private Logger getLogger() {
+        if (logger == null) {
+            logger = AuthAnvilLogin.instance.getLogger();
+        }
+        return logger;
+    }
 
     public WebServer(int port, StatisticsManager statsManager, String accessToken) {
         super(port);
@@ -36,7 +43,7 @@ public class WebServer extends NanoHTTPD {
         Method method = session.getMethod();
 
         if (Config.isDebug) {
-            logger.info("Web请求: " + method + " " + uri + " from " + session.getRemoteIpAddress());
+            getLogger().info("Web请求: " + method + " " + uri + " from " + session.getRemoteIpAddress());
         }
 
         try {
@@ -59,7 +66,7 @@ public class WebServer extends NanoHTTPD {
             return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "404 Not Found");
 
         } catch (Exception e) {
-            logger.severe("处理Web请求失败: " + e.getMessage());
+            getLogger().severe("处理Web请求失败: " + e.getMessage());
             return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "500 Internal Server Error");
         }
     }
@@ -167,7 +174,7 @@ public class WebServer extends NanoHTTPD {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
             return newFixedLengthResponse(Response.Status.OK, mimeType, content);
         } catch (IOException e) {
-            logger.severe("读取文件失败: " + resourcePath);
+            getLogger().severe("读取文件失败: " + resourcePath);
             return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Error reading file");
         }
     }
@@ -178,10 +185,10 @@ public class WebServer extends NanoHTTPD {
     public void startServer() {
         try {
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-            logger.info("Web管理面板已启动: http://localhost:" + getListeningPort());
-            logger.info("访问令牌: " + accessToken);
+            getLogger().info("Web管理面板已启动: http://localhost:" + getListeningPort());
+            getLogger().info("访问令牌: " + accessToken);
         } catch (IOException e) {
-            logger.severe("启动Web服务器失败: " + e.getMessage());
+            getLogger().severe("启动Web服务器失败: " + e.getMessage());
         }
     }
 
@@ -190,6 +197,6 @@ public class WebServer extends NanoHTTPD {
      */
     public void stopServer() {
         stop();
-        logger.info("Web管理面板已停止");
+        getLogger().info("Web管理面板已停止");
     }
 }

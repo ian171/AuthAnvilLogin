@@ -14,7 +14,14 @@ import java.util.logging.Logger;
 public class LoginAttemptManager {
     private static final String DATA_FILE = "plugins/AuthAnvilLogin/login_attempts.dat";
     private final Map<UUID, AttemptRecord> attemptMap = new ConcurrentHashMap<>();
-    private final Logger logger = AuthAnvilLogin.instance.getLogger();
+    private Logger logger;
+
+    private Logger getLogger() {
+        if (logger == null) {
+            logger = AuthAnvilLogin.instance.getLogger();
+        }
+        return logger;
+    }
 
     public static class AttemptRecord implements Serializable {
         private static final long serialVersionUID = 1L;
@@ -76,7 +83,7 @@ public class LoginAttemptManager {
         if (record.attempts >= maxAttempts) {
             long lockoutDuration = Config.LOCKOUT_DURATION * 1000L;
             record.lockoutUntil = System.currentTimeMillis() + lockoutDuration;
-            logger.warning("玩家 " + uuid + " 登录失败次数过多，锁定 " + Config.LOCKOUT_DURATION + " 秒");
+            getLogger().warning("玩家 " + uuid + " 登录失败次数过多，锁定 " + Config.LOCKOUT_DURATION + " 秒");
         }
 
         saveToFile();
@@ -110,9 +117,9 @@ public class LoginAttemptManager {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             Map<UUID, AttemptRecord> loaded = (Map<UUID, AttemptRecord>) ois.readObject();
             attemptMap.putAll(loaded);
-            logger.info("加载了 " + loaded.size() + " 条登录尝试记录");
+            getLogger().info("加载了 " + loaded.size() + " 条登录尝试记录");
         } catch (Exception e) {
-            logger.warning("加载登录尝试记录失败: " + e.getMessage());
+            getLogger().warning("加载登录尝试记录失败: " + e.getMessage());
         }
     }
 
@@ -126,7 +133,7 @@ public class LoginAttemptManager {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeObject(attemptMap);
         } catch (Exception e) {
-            logger.severe("保存登录尝试记录失败: " + e.getMessage());
+            getLogger().severe("保存登录尝试记录失败: " + e.getMessage());
         }
     }
 

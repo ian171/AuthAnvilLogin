@@ -1,6 +1,5 @@
 package net.chen.ll.authAnvilLogin;
 
-import com.github.games647.fastlogin.bukkit.FastLoginBukkit;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
@@ -29,8 +28,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static net.chen.ll.authAnvilLogin.core.Handler.subCommands;
 
 
 public final class AuthAnvilLogin extends JavaPlugin {
@@ -91,7 +88,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public void onLoad() {
         if (isUnsupported()){
-            getLogger().severe("当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
+            System.err.println("[AuthAnvilLogin] 当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
             getServer().getPluginManager().disablePlugin(this);
         }
         runtime = System.getProperty("user.dir");
@@ -189,7 +186,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length > 1) return new ArrayList<>();
-        if (args.length == 0) return Arrays.asList(subCommands);
-        return Arrays.stream(subCommands).filter(s -> s.startsWith(args[0])).toList();
+        if (args.length == 0) return Arrays.asList(Handler.subCommands);
+        return Arrays.stream(Handler.subCommands).filter(s -> s.startsWith(args[0])).toList();
     }
 }

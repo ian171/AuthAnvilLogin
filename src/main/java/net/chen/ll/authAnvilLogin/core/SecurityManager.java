@@ -14,7 +14,14 @@ import java.util.logging.Logger;
 public class SecurityManager {
     private static final String AUDIT_LOG = "plugins/AuthAnvilLogin/security_audit.log";
     private final Map<String, RateLimitRecord> rateLimitMap = new ConcurrentHashMap<>();
-    private final Logger logger = AuthAnvilLogin.instance.getLogger();
+    private Logger logger;
+
+    private Logger getLogger() {
+        if (logger == null) {
+            logger = AuthAnvilLogin.instance.getLogger();
+        }
+        return logger;
+    }
 
     // 速率限制：每IP每分钟最多5次尝试
     private static final int MAX_REQUESTS_PER_MINUTE = 5;
@@ -91,10 +98,10 @@ public class SecurityManager {
         try (FileWriter fw = new FileWriter(AUDIT_LOG, true)) {
             fw.write(logEntry);
         } catch (IOException e) {
-            logger.warning("写入审计日志失败: " + e.getMessage());
+            getLogger().warning("写入审计日志失败: " + e.getMessage());
         }
 
-        logger.warning("安全事件: " + logEntry.trim());
+        getLogger().warning("安全事件: " + logEntry.trim());
     }
 
     /**

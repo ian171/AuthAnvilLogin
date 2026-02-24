@@ -16,8 +16,15 @@ import java.util.logging.Logger;
 import static net.chen.ll.authAnvilLogin.core.Config.*;
 
 public class ConfigLoader {
-    public static Logger logger= AuthAnvilLogin.instance.getLogger();
+    private static Logger logger;
     public static Configuration config = AuthAnvilLogin.instance.getConfig();
+
+    private static Logger getLogger() {
+        if (logger == null) {
+            logger = AuthAnvilLogin.instance.getLogger();
+        }
+        return logger;
+    }
 
     public static void loadConfig() {
         config = AuthAnvilLogin.instance.getConfig();
@@ -52,9 +59,9 @@ public class ConfigLoader {
             WEB_TOKEN = config.getString("web.token", generateRandomToken());
 
             if (isDebug) {
-                logger.warning("You are using unsupported functions,We do not recommend you to do that!");
+                getLogger().warning("You are using unsupported functions,We do not recommend you to do that!");
                 //allow_players = new CustomConfig(AuthAnvilLogin.getPlugin(AuthAnvilLogin.class), "data.yml");
-                logger.fine("Started!");
+                getLogger().fine("Started!");
             }
 
             try {
@@ -69,14 +76,14 @@ public class ConfigLoader {
                 loadItemConfig("materials.register.output", AnvilSlot.REGISTER_OUT, "ARROW");
 
                 if (isDebug) {
-                    logger.info("物品类型加载完成:");
+                    getLogger().info("物品类型加载完成:");
                     for (Map.Entry<AnvilSlot, ItemStack> entry : Config.getItemsListMap().entrySet()) {
-                        logger.info("  " + entry.getKey() + " -> " + entry.getValue().getType());
+                        getLogger().info("  " + entry.getKey() + " -> " + entry.getValue().getType());
                     }
                 }
             } catch (Exception e) {
-                logger.severe("⚠错误的物品属性！❌");
-                logger.warning(e.getMessage());
+                getLogger().severe("⚠错误的物品属性！❌");
+                getLogger().warning(e.getMessage());
                 if (isDebug) {
                     e.printStackTrace();
                 }
@@ -84,14 +91,14 @@ public class ConfigLoader {
 
             setVer(config.getInt("ver"));
         } catch (NullPointerException e) {
-            logger.warning("配置文件读取失败，使用默认值");
+            getLogger().warning("配置文件读取失败，使用默认值");
             isConfigValid = false;
         }finally {
             if (isConfigValid) {
-                logger.info("配置文件读取成功");
+                getLogger().info("配置文件读取成功");
             }
             if (isDebug){
-                logger.info("Config Version:"+ Config.getVer());
+                getLogger().info("Config Version:"+ Config.getVer());
                 for (String key : config.getKeys(false)) {
                     Bukkit.getServer().sendMessage(Component.empty().content(key + ":" + config.get(key)));
                 }
@@ -135,14 +142,14 @@ public class ConfigLoader {
             Config.addItemsMap(slot, itemStack);
             if (isDebug) {
                 if (itemId.contains(":")) {
-                    logger.info("已加载自定义物品: " + configPath + " = " + itemId);
+                    getLogger().info("已加载自定义物品: " + configPath + " = " + itemId);
                 } else {
-                    logger.info("已加载原版物品: " + configPath + " = " + itemId);
+                    getLogger().info("已加载原版物品: " + configPath + " = " + itemId);
                 }
             }
         } else {
             // 物品加载失败，使用默认值
-            logger.warning("无效的物品ID: " + configPath + " = " + itemId + ", 使用默认值: " + defaultItem);
+            getLogger().warning("无效的物品ID: " + configPath + " = " + itemId + ", 使用默认值: " + defaultItem);
             ItemStack fallbackItem = ItemsAdderHelper.getItem(defaultItem);
             if (fallbackItem != null) {
                 Config.addItemsMap(slot, fallbackItem);

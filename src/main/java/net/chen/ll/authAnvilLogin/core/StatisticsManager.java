@@ -24,7 +24,14 @@ import java.util.logging.Logger;
 public class StatisticsManager {
     private static final String STATS_FILE = "plugins/AuthAnvilLogin/statistics.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private final Logger logger = AuthAnvilLogin.instance.getLogger();
+    private Logger logger;
+
+    private Logger getLogger() {
+        if (logger == null) {
+            logger = AuthAnvilLogin.instance.getLogger();
+        }
+        return logger;
+    }
 
     // 实时统计数据（线程安全）
     private final AtomicInteger todayRegistrations = new AtomicInteger(0);
@@ -105,7 +112,7 @@ public class StatisticsManager {
             todayFailures.set(0);
             todayRateLimits.set(0);
             currentDate = today;
-            logger.info("日期变更，统计数据已重置");
+            getLogger().info("日期变更，统计数据已重置");
         }
     }
 
@@ -298,7 +305,7 @@ public class StatisticsManager {
                 GSON.toJson(data, writer);
             }
         } catch (Exception e) {
-            logger.warning("保存统计数据失败: " + e.getMessage());
+            getLogger().warning("保存统计数据失败: " + e.getMessage());
         }
     }
 
@@ -338,10 +345,10 @@ public class StatisticsManager {
                 todayFailures.set(((Number) data.getOrDefault("todayFailures", 0)).intValue());
                 todayRateLimits.set(((Number) data.getOrDefault("todayRateLimits", 0)).intValue());
 
-                logger.info("加载了 " + dailyStatsMap.size() + " 天的统计数据");
+                getLogger().info("加载了 " + dailyStatsMap.size() + " 天的统计数据");
             }
         } catch (Exception e) {
-            logger.warning("加载统计数据失败: " + e.getMessage());
+            getLogger().warning("加载统计数据失败: " + e.getMessage());
         }
     }
 
@@ -352,7 +359,7 @@ public class StatisticsManager {
         String cutoffDate = LocalDate.now().minusDays(30).toString();
         dailyStatsMap.entrySet().removeIf(entry -> entry.getKey().compareTo(cutoffDate) < 0);
         saveToFile();
-        logger.info("已清理30天前的统计数据");
+        getLogger().info("已清理30天前的统计数据");
     }
 
     /**
