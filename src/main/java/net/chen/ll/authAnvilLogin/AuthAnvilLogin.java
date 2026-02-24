@@ -35,7 +35,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
     public static String plugin_path ;
-    public static String version = "2.2.2";
+    public static String version = "2.2.3";
     public static String lastest = "";
     public boolean isFastLoginEnabled = false;
     public static AuthAnvilLogin instance;
