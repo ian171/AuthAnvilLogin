@@ -119,9 +119,7 @@ public class Handler implements Listener {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-
-            // 回到主线程执行
-            Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+            SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
                 // 检查玩家是否还在线
                 if (!player.isOnline()) {
                     pendingAuthentication.remove(playerUUID);
@@ -138,6 +136,24 @@ public class Handler implements Listener {
 
                 handlePlayerAuthentication(player);
             });
+            // 回到主线程执行
+//            Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+//                // 检查玩家是否还在线
+//                if (!player.isOnline()) {
+//                    pendingAuthentication.remove(playerUUID);
+//                    return;
+//                }
+//
+//                // 检查是否已经被其他方式认证
+//                if (!pendingAuthentication.getOrDefault(playerUUID, false)) {
+//                    if (isDebug) {
+//                        getLogger().info(player.getName() + " authentication already handled by event");
+//                    }
+//                    return;
+//                }
+//
+//                handlePlayerAuthentication(player);
+//            });
         });
     }
     @EventHandler
