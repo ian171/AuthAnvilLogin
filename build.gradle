@@ -10,6 +10,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
+
 repositories {
     mavenLocal()
     maven {
@@ -55,7 +56,8 @@ repositories {
 
 dependencies {
     api "net.wesjd:anvilgui:1.10.11-SNAPSHOT"
-    compileOnly libs.io.papermc.paper.paper.api
+    //compileOnly libs.io.papermc.paper.paper.api
+    compileOnly("io.papermc.paper:paper-api:1.21.9-R0.1-SNAPSHOT")
     compileOnly libs.fr.xephi.authme
     compileOnly libs.me.clip.placeholderapi
     compileOnly libs.org.geysermc.geyser.api

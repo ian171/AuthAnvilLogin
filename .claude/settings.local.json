@@ -9,7 +9,17 @@
       "Bash(./gradlew clean build --no-daemon)",
       "Bash(chmod:*)",
       "Bash(./gradlew shadowJar --no-daemon)",
-      "WebFetch(domain:mclo.gs)"
+      "WebFetch(domain:mclo.gs)",
+      "Bash(jar tf *)",
+      "Read(//private/tmp/**)",
+      "Bash(jar xf *)",
+      "Read(//tmp/**)",
+      "Bash(mkdir *)",
+      "Bash(javap -p /tmp/adventure/net/kyori/adventure/audience/Audience.class)",
+      "Bash(javap *)",
+      "WebFetch(domain:jd.papermc.io)",
+      "WebSearch",
+      "Bash(unzip *)"
     ],
     "deny": [],
     "ask": []

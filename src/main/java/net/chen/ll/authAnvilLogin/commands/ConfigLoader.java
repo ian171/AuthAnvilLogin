@@ -52,6 +52,7 @@ public class ConfigLoader {
             agreements = config.getStringList("agreement");
             link = config.getString("messages.link");
             isUsedPasswdGen = config.getBoolean("config.usePasswdGen");
+            isUseDialogGui = config.getBoolean("config.useDialogGui");
 
             // Web 管理面板配置
             WEB_ENABLED = config.getBoolean("web.enabled", true);

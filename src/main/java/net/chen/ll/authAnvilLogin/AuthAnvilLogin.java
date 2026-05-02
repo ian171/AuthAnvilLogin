@@ -35,7 +35,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
     public static String plugin_path ;
-    public static String version = "2.2.3";
+    public static String version = "2.2.4";
     public static String lastest = "";
     public boolean isFastLoginEnabled = false;
     public static AuthAnvilLogin instance;
@@ -166,7 +166,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
                 logger.severe("Web 管理面板启动失败: " + e.getMessage());
             }
         }
-
+        logger.info("你所在的版本为："+Bukkit.getServer().getVersion()+"\n只有1.21.7以上版本支持dialog对话框登录");
         logger.info("AuthAnvilLogin enabled");
     }
     @Override

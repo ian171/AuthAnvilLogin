@@ -3,10 +3,22 @@ package net.chen.ll.authAnvilLogin.core;
 import fr.xephi.authme.api.v3.AuthMeApi;
 import fr.xephi.authme.events.LoginEvent;
 import fr.xephi.authme.events.RegisterEvent;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.*;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.Audiences;
+import net.kyori.adventure.text.Component;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -317,7 +329,124 @@ public class Handler implements Listener {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    private void openLoginDialog(Player player) {
+        DialogActionCallback submitCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            String password = response.getText("password");
+            if (password == null || password.isBlank()) {
+                p.sendMessage("§c请输入密码！");
+                return;
+            }
+            handleLogin(p, password);
+        };
+
+        DialogActionCallback switchToRegCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            openRegisterDialog(p);
+        };
+
+        ClickCallback.Options cbOptions = ClickCallback.Options.builder()
+                .uses(Integer.MAX_VALUE)
+                .lifetime(java.time.Duration.ofMinutes(10))
+                .build();
+
+        ActionButton submitButton = ActionButton.builder(Component.text(ConfigUtil.getMessage("login-button")))
+                .width(150)
+                .action(DialogAction.customClick(submitCallback, cbOptions))
+                .build();
+
+        ActionButton registerButton = ActionButton.builder(Component.text(ConfigUtil.getMessage("reg-button")))
+                .width(150)
+                .action(DialogAction.customClick(switchToRegCallback, cbOptions))
+                .build();
+
+        DialogBase base = DialogBase.builder(Component.text(ConfigUtil.getMessage("login-title")))
+                .canCloseWithEscape(false)
+                .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                .body(List.of(
+                        DialogBody.plainMessage(Component.text("请输入密码登录"), 300)
+                ))
+                .inputs(List.of(
+                        DialogInput.text("password", Component.text("密码"))
+                                .width(250)
+                                .maxLength(64)
+                                .multiline(null)
+                                .build()
+                ))
+                .build();
+
+        Dialog dialog = Dialog.create(factory ->
+                factory.empty()
+                        .base(base)
+                        .type(DialogType.confirmation(submitButton, registerButton))
+        );
+
+        player.showDialog(dialog);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void openRegisterDialog(Player player) {
+        DialogActionCallback submitCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            String password = response.getText("password");
+            if (password == null || password.isBlank()) {
+                p.sendMessage("§c请输入密码！");
+                return;
+            }
+            handleRegistry(p, password);
+        };
+
+        ClickCallback.Options cbOptions = ClickCallback.Options.builder()
+                .uses(Integer.MAX_VALUE)
+                .lifetime(java.time.Duration.ofMinutes(10))
+                .build();
+
+        ActionButton submitButton = ActionButton.builder(Component.text(ConfigUtil.getMessage("reg-button")))
+                .width(150)
+                .action(DialogAction.customClick(submitCallback, cbOptions))
+                .build();
+
+        ActionButton cancelButton = ActionButton.builder(Component.text("取消"))
+                .width(150)
+                .action(null)
+                .build();
+
+        DialogBase base = DialogBase.builder(Component.text(ConfigUtil.getMessage("reg-title")))
+                .canCloseWithEscape(false)
+                .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                .body(List.of(
+                        DialogBody.plainMessage(Component.text("欢迎！请设置你的密码（6-16位）"), 300)
+                ))
+                .inputs(List.of(
+                        DialogInput.text("password", Component.text("密码"))
+                                .width(250)
+                                .maxLength(64)
+                                .multiline(null)
+                                .build()
+                ))
+                .build();
+
+        Dialog dialog = Dialog.create(factory ->
+                factory.empty()
+                        .base(base)
+                        .type(DialogType.confirmation(submitButton, cancelButton))
+        );
+
+        player.showDialog(dialog);
+    }
+
     public void openLoginUI(Player player) {
+        if(player.getProtocolVersion() >= 772){
+            if (isUseDialogGui){
+                try {
+                    openLoginDialog(player);
+                    return;
+                } catch (Exception e) {
+                    logger.warning("Failed to open dialog Gui caused by "+e.getMessage());
+                }
+            }
+        }
         try {
             new AnvilGUI.Builder()
                     .title(ConfigUtil.getMessage("login-title"))
@@ -442,6 +571,16 @@ public class Handler implements Listener {
         Agreement.open(player);
     }
     public void openRegisterUI(Player player) {
+        if(player.getProtocolVersion() >= 772){
+            if (isUseDialogGui){
+                try {
+                    openRegisterDialog(player);
+                    return;
+                } catch (Exception e) {
+                    logger.warning("Failed to open register dialog Gui caused by "+e.getMessage());
+                }
+            }
+        }
         player.closeInventory();
         try {
 //            ItemStack reg_confirm = new ItemStack(getItemsListMap().get(AnvilSlot.REGISTER_LEFT));

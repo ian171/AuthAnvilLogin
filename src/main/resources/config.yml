@@ -20,6 +20,7 @@ config:
   delay-time: 45L
   close-kick: true
   usePasswdGen: false
+  useDialogGui: true
 materials:
   login:
     left: "PAPER"

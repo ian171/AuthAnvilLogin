@@ -3,6 +3,7 @@ package net.chen.ll.authAnvilLogin.core;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.util.SchedulerUtil;
 import org.bukkit.entity.Player;
 
 import java.io.*;
@@ -275,10 +276,7 @@ public class StatisticsManager {
      * 异步保存到文件
      */
     private void saveToFileAsync() {
-        AuthAnvilLogin.instance.getServer().getScheduler().runTaskAsynchronously(
-            AuthAnvilLogin.instance,
-            this::saveToFile
-        );
+        SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, this::saveToFile);
     }
 
     /**
