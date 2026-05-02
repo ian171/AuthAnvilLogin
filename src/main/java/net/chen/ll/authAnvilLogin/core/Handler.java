@@ -112,7 +112,8 @@ public class Handler implements Listener {
         try {
             Class.forName("org.geysermc.floodgate.api.FloodgateApi");
             FloodgateApi floodgateApi = FloodgateApi.getInstance();
-            if(player.getClientBrandName().contains("Geyser")){
+            String brand = player.getClientBrandName();
+            if(brand != null && brand.contains("Geyser")){
                 FloodgatePlayer floodgatePlayer = floodgateApi.getPlayer(player.getUniqueId());
                 getLogger().info("Connected with Bedrock:"+player.getUniqueId());
                 BedrockGui.getInstance().handleAuthentication(player, floodgatePlayer);
@@ -295,7 +296,6 @@ public class Handler implements Listener {
     private void handlePlayerAuthentication(Player player) {
         try {
             if (api.isRegistered(player.getName())) {
-                // AuthMe 已认证（包括自动登录 / 跨服）
                 if (api.isAuthenticated(player)) {
                     if (isDebug) {
                         getLogger().info(player.getName() + " already authenticated by AuthMe, skip AnvilGUI");
@@ -303,9 +303,6 @@ public class Handler implements Listener {
                     pendingAuthentication.remove(player.getUniqueId());
                     return;
                 }
-
-                // 未登录 → 打开登录 UI
-                openLoginUI(player);
 
                 if (isDebug) {
                     getLogger().info(
@@ -315,11 +312,12 @@ public class Handler implements Listener {
                     );
                 }
 
+                player.getScheduler().run(AuthAnvilLogin.instance, task -> openLoginUI(player), null);
+
             } else {
-                // 新玩家 → 注册流程
                 player.sendMessage("§e检测到你是第一次来到服务器，请先注册账号");
                 getLogger().info(player.getName() + " is new with " + player.getClientBrandName());
-                openRegisterUI(player);
+                player.getScheduler().run(AuthAnvilLogin.instance, task -> openRegisterUI(player), null);
             }
 
         } catch (Exception e) {
