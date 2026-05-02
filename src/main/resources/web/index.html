@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuthAnvilLogin 统计面板</title>
+    <title>ProAuthMeLogin 统计面板</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
 
         <header class="header">
             <div class="header-content">
-                <h1>🔐 AuthAnvilLogin 统计面板</h1>
+                <h1>🔐 ProAuthMeLogin 统计面板</h1>
                 <div class="header-info">
                     <span class="status-badge online">● 在线</span>
                     <span id="lastUpdate">最后更新: --</span>
@@ -22,7 +22,7 @@
             <div class="auth-box">
                 <h2>🔑 访问验证</h2>
                 <p>请输入访问令牌以继续</p>
-                <input type="password" id="tokenInput" placeholder="输入访问令牌" />
+                <label for="tokenInput"></label><input type="password" id="tokenInput" placeholder="输入访问令牌" />
                 <button onclick="authenticate()">验证</button>
                 <p class="hint">提示: 令牌可在服务器控制台查看</p>
             </div>
@@ -126,7 +126,7 @@
 
         <!-- 页脚 -->
         <footer class="footer">
-            <p>AuthAnvilLogin v2.2.2 | Made with ❤️ by Chen</p>
+            <p>ProAuthMeLogin v2.2.4 | Made with ❤️ by Chen</p>
         </footer>
     </div>
 

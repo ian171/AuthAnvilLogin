@@ -70,8 +70,8 @@ dependencies {
 
 
 group = 'net.chen.ll'
-version = '2.2.3-Stable'
-description = 'authanvillogin'
+version = '2.2.4-Stable'
+description = 'ProAuthMeLogin'
 java.sourceCompatibility = JavaVersion.VERSION_21
 
 publishing {

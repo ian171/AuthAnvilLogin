@@ -4,6 +4,7 @@ import fr.xephi.authme.api.v3.AuthMeApi;
 import fr.xephi.authme.events.LoginEvent;
 import fr.xephi.authme.events.RegisterEvent;
 import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
@@ -33,6 +34,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.geysermc.floodgate.api.FloodgateApi;
 import org.geysermc.floodgate.api.player.FloodgatePlayer;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -214,11 +216,10 @@ public class Handler implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryOpen(InventoryOpenEvent event) {
-        if (!(event.getPlayer() instanceof Player)) {
+        if (!(event.getPlayer() instanceof Player player)) {
             return;
         }
 
-        Player player = (Player) event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
         // 如果玩家正在等待认证且尚未通过 AuthMe 认证
@@ -254,11 +255,10 @@ public class Handler implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClose(InventoryCloseEvent event) {
 
-        if (!(event.getPlayer() instanceof Player)) {
+        if (!(event.getPlayer() instanceof Player player)) {
             return;
         }
 
-        Player player = (Player) event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
         // 如果玩家正在等待认证且尚未通过 AuthMe 认证
@@ -399,7 +399,7 @@ public class Handler implements Listener {
 
         ClickCallback.Options cbOptions = ClickCallback.Options.builder()
                 .uses(Integer.MAX_VALUE)
-                .lifetime(java.time.Duration.ofMinutes(10))
+                .lifetime(Duration.ofMinutes(10))
                 .build();
 
         ActionButton submitButton = ActionButton.builder(Component.text(ConfigUtil.getMessage("reg-button")))
@@ -532,11 +532,11 @@ public class Handler implements Listener {
 
                             if (isDebug) {
                                 getLogger().warning("Unsupported functions are using");
-                                openAgreement(player);
                             }
                             player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                                 player.closeInventory();
                                 player.sendMessage("§a登录成功！");
+                                sendAgreement(player);
                             }, null);
                         } else {
                             int attempts = attemptManager.recordFailedAttempt(playerUUID, Config.MAX_ATTEMPTS);
@@ -566,10 +566,61 @@ public class Handler implements Listener {
             }
         });
     }
-    @Deprecated
-    private void openAgreement(Player player){
-        Agreement.open(player);
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void sendAgreement(Player player) {
+        if (!enableAgreement) return;
+        if (player.getProtocolVersion() < 772) return;
+
+        StringBuilder agr = new StringBuilder();
+        for (String line : agreements) {
+            agr.append(line).append("\n");
+        }
+        String agreementText = !agr.isEmpty() ? agr.toString().trim() : "请阅读并同意服务器用户协议。";
+
+        ClickCallback.Options cbOptions = ClickCallback.Options.builder()
+                .uses(1)
+                .lifetime(java.time.Duration.ofMinutes(10))
+                .build();
+
+        DialogActionCallback acceptCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            p.sendMessage("§a欢迎加入服务器！祝你游戏愉快！");
+        };
+
+        DialogActionCallback denyCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            p.kick(Component.text("§c你拒绝了用户协议，无法进入服务器。"));
+        };
+
+        ActionButton acceptButton = ActionButton.builder(Component.text("§a接受"))
+                .width(150)
+                .action(DialogAction.customClick(acceptCallback, cbOptions))
+                .build();
+
+        ActionButton denyButton = ActionButton.builder(Component.text("§c拒绝"))
+                .width(150)
+                .action(DialogAction.customClick(denyCallback, cbOptions))
+                .build();
+
+        DialogBase base = DialogBase.builder(Component.text("§6用户协议须知"))
+                .canCloseWithEscape(false)
+                .afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(List.of(
+                        DialogBody.plainMessage(Component.text(agreementText), 350)
+                ))
+                .build();
+
+        Dialog dialog = Dialog.create(factory ->
+                factory.empty()
+                        .base(base)
+                        .type(DialogType.confirmation(acceptButton, denyButton))
+        );
+
+        player.showDialog(dialog);
     }
+
+
     public void openRegisterUI(Player player) {
         if(player.getProtocolVersion() >= 772){
             if (isUseDialogGui){
@@ -667,6 +718,7 @@ public class Handler implements Listener {
                     player.sendMessage("注册成功😀！");
                     player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         player.closeInventory();
+                        sendAgreement(player);
                     },null);
 
                     String ip = securityManager.getRealIP(player);

@@ -1,7 +1,7 @@
-name: AuthAnvilLogin
+name: ProAuthMeLogin
 version: '2.2.3-Stable'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
-api-version: '1.12'
+api-version: '1.21'
 load: POSTWORLD
 authors: [ Chen ]
 folia-supported: true

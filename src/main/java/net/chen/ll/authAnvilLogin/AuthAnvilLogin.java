@@ -88,7 +88,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public void onLoad() {
         if (isUnsupported()){
-            System.err.println("[AuthAnvilLogin] 当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
+            System.err.println("[ProAuthMeLogin] 当前服务器版本不支持本插件！,如果你想忽略版本检查，请提交issues或pull request");
             getServer().getPluginManager().disablePlugin(this);
         }
         runtime = System.getProperty("user.dir");
@@ -167,11 +167,11 @@ public final class AuthAnvilLogin extends JavaPlugin {
             }
         }
         logger.info("你所在的版本为："+Bukkit.getServer().getVersion()+"\n只有1.21.7以上版本支持dialog对话框登录");
-        logger.info("AuthAnvilLogin enabled");
+        logger.info("ProAuthMeLogin enabled");
     }
     @Override
     public void onDisable() {
-        logger.info("AuthAnvilLogin disabling");
+        logger.info("ProAuthMeLogin disabling");
 
         // 停止 Web 服务器
         if (webServer != null) {
