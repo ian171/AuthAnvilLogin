@@ -36,8 +36,12 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
       
-    - name: Download a Build Artifact
-      uses: actions/download-artifact@v3.1.0
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
       with:
-        # Artifact name
-        name: ProAuthMeLogin
+        name: my-gradle-build-output # 下载时的压缩包名称
+        # 根据你的项目类型修改路径：
+        # Java/Spring Boot 一般在 build/libs/
+        # Android 一般在 app/build/outputs/apk/debug/
+        path: build/libs/*.jar 
+        retention-days: 90 # 可选：设置保留天数（默认90天）
