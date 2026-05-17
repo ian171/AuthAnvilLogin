@@ -4,7 +4,6 @@ import fr.xephi.authme.api.v3.AuthMeApi;
 import fr.xephi.authme.events.LoginEvent;
 import fr.xephi.authme.events.RegisterEvent;
 import io.papermc.paper.dialog.Dialog;
-import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
@@ -12,14 +11,11 @@ import io.papermc.paper.registry.data.dialog.action.DialogActionCallback;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
-import net.kyori.adventure.text.event.ClickCallback;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
-import net.chen.ll.authAnvilLogin.gui.Agreement;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.*;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.audience.Audiences;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -416,6 +412,9 @@ public class Handler implements Listener {
                 .body(List.of(
                         DialogBody.plainMessage(Component.text("欢迎！请设置你的密码（6-16位）"), 300)
                 ))
+                .body(List.of(
+                        DialogBody.plainMessage(Component.text("(如果在点击注册按钮之后没有正确关闭，可能是你没有输入正确的密码规范)"))
+                ))
                 .inputs(List.of(
                         DialogInput.text("password", Component.text("密码"))
                                 .width(250)
@@ -517,8 +516,8 @@ public class Handler implements Listener {
                 if (api.isRegistered(player.getName())) {
                     boolean passwordValid = api.checkPassword(player.getName(), password);
 
-                    // 回到主线程执行游戏操作
-                    SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
+                    // 切回玩家实体调度器执行 AuthMe 登录及游戏操作
+                    player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         if (passwordValid) {
                             long loginStartTime = System.currentTimeMillis();
                             api.forceLogin(player);
@@ -531,11 +530,9 @@ public class Handler implements Listener {
                             if (isDebug) {
                                 getLogger().warning("Unsupported functions are using");
                             }
-                            player.getScheduler().run(AuthAnvilLogin.instance, task -> {
-                                player.closeInventory();
-                                player.sendMessage("§a登录成功！");
-                                sendAgreement(player);
-                            }, null);
+                            player.closeInventory();
+                            player.sendMessage("§a登录成功！");
+                            sendAgreement(player);
                         } else {
                             int attempts = attemptManager.recordFailedAttempt(playerUUID, Config.MAX_ATTEMPTS);
                             securityManager.logLoginFailure(player, attempts);
@@ -544,23 +541,26 @@ public class Handler implements Listener {
                             int remaining = Config.MAX_ATTEMPTS - attempts;
                             if (remaining > 0) {
                                 player.sendMessage("密码错误！还剩 " + remaining + " 次机会");
+                                player.sendActionBar(Component.text("§c密码错误！还剩 " + remaining + " 次机会"));
+                                player.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                                        t -> openLoginUI(player), null, 10L);
                             } else {
                                 statisticsManager.recordLockout(player, ip);
                                 player.kickPlayer("登录失败次数过多，已被锁定5分钟");
                             }
                         }
-                    });
+                    }, null);
                 } else {
-                    SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
+                    player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         player.sendMessage("你还没有注册，请先注册！");
                         openRegisterUI(player);
-                    });
+                    }, null);
                 }
             } catch (Exception e) {
                 getLogger().severe("密码验证失败: " + e.getMessage());
-                SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
-                    player.sendMessage("登录验证出错，请重试");
-                });
+                if (isDebug) e.printStackTrace();
+                player.getScheduler().run(AuthAnvilLogin.instance, task ->
+                        player.sendMessage("登录验证出错，请重试"), null);
             }
         });
     }
@@ -670,30 +670,10 @@ public class Handler implements Listener {
         }
     }
     public void handleRegistry(Player player, String password) {
-        // 输入验证（主线程）
-        if (password == null) {
-            player.sendMessage("输入不能为空！");
-            openRegisterUI(player);
-            return;
-        }
-        if (password.length() < 6 && checkLowestPassword) {
-            player.sendMessage("密码长度不能小于6位！");
-            openRegisterUI(player);
-            return;
-        }
-        if (password.length() > 16 && checkLongestPassword) {
-            player.sendMessage("密码长度不能大于16位！");
-            openRegisterUI(player);
-            return;
-        }
-        if (password.contains(" ")) {
-            player.sendMessage("密码不能包含空格！");
-            openRegisterUI(player);
-            return;
-        }
-        if (!isContainUpper(password) && isRequestUpper) {
-            player.sendMessage("密码未包含大写字母");
-            openRegisterUI(player);
+        // 输入验证
+        String validationError = validateRegisterPassword(password);
+        if (validationError != null) {
+            notifyAndReopenRegister(player, validationError);
             return;
         }
 
@@ -701,36 +681,58 @@ public class Handler implements Listener {
         SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
             try {
                 if (api.isRegistered(player.getName())) {
-                    Bukkit.getScheduler().runTask(AuthAnvilLogin.instance, () -> {
+                    player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         player.sendMessage("你已经注册了！");
                         player.closeInventory();
-                    });
+                    }, null);
                     return;
                 }
 
-                api.forceRegister(player, password);
+                String ip = securityManager.getRealIP(player);
 
-                // 回到主线程执行游戏操作
-                SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
-                    api.forceLogin(player);
-                    player.sendMessage("注册成功😀！");
-                    player.getScheduler().run(AuthAnvilLogin.instance, task -> {
+                // 切回玩家实体调度器执行 AuthMe 注册/登录及游戏操作
+                player.getScheduler().run(AuthAnvilLogin.instance, task -> {
+                    try {
+                        api.forceRegister(player, password);
+                        api.forceLogin(player);
                         player.closeInventory();
+                        player.sendMessage("注册成功😀！");
                         sendAgreement(player);
-                    },null);
 
-                    String ip = securityManager.getRealIP(player);
-                    securityManager.logRegistration(player);
-                    statisticsManager.recordRegistration(player, ip);
-                    getLogger().info(player.getName() + " 注册成功");
-                });
+                        securityManager.logRegistration(player);
+                        statisticsManager.recordRegistration(player, ip);
+                        getLogger().info(player.getName() + " 注册成功");
+                    } catch (Exception e) {
+                        getLogger().severe("注册失败: " + e.getMessage());
+                        if (isDebug) e.printStackTrace();
+                        player.sendMessage("注册出错，请重试");
+                    }
+                }, null);
             } catch (Exception e) {
-                getLogger().severe("注册失败: " + e.getMessage());
-                SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
-                    player.sendMessage("注册出错，请重试");
-                });
+                getLogger().severe("注册检查失败: " + e.getMessage());
+                if (isDebug) e.printStackTrace();
+                player.getScheduler().run(AuthAnvilLogin.instance, task ->
+                        player.sendMessage("注册出错，请重试"), null);
             }
         });
+    }
+
+    private String validateRegisterPassword(String password) {
+        if (password == null || password.isEmpty()) return "输入不能为空！";
+        if (password.length() < 6 && checkLowestPassword) return "密码长度不能小于6位！";
+        if (password.length() > 16 && checkLongestPassword) return "密码长度不能大于16位！";
+        if (password.contains(" ")) return "密码不能包含空格！";
+        if (!isContainUpper(password) && isRequestUpper) return "密码未包含大写字母";
+        return null;
+    }
+
+    private void notifyAndReopenRegister(Player player, String message) {
+        player.getScheduler().run(AuthAnvilLogin.instance, task -> {
+            player.sendMessage(message);
+            player.sendActionBar(Component.text("§c" + message));
+        }, null);
+        player.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                task -> openRegisterUI(player), null, 10L);
     }
     public static boolean isContainUpper(String str) {
         return str.chars().anyMatch(Character::isUpperCase);

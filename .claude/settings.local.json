@@ -19,7 +19,8 @@
       "Bash(javap *)",
       "WebFetch(domain:jd.papermc.io)",
       "WebSearch",
-      "Bash(unzip *)"
+      "Bash(unzip *)",
+      "Bash(./gradlew compileJava)"
     ],
     "deny": [],
     "ask": []

@@ -11,6 +11,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import static net.chen.ll.authAnvilLogin.core.Config.*;

@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 /**
@@ -54,7 +55,7 @@ public class ItemsAdderHelper {
             try {
                 // 使用反射调用 ItemsAdder API，避免硬依赖
                 Class<?> itemsAdderClass = Class.forName("dev.lone.itemsadder.api.ItemsAdder");
-                java.lang.reflect.Method getCustomItemMethod = itemsAdderClass.getMethod("getCustomItem", String.class);
+                Method getCustomItemMethod = itemsAdderClass.getMethod("getCustomItem", String.class);
                 ItemStack customItem = (ItemStack) getCustomItemMethod.invoke(null, itemId);
 
                 if (customItem != null) {
@@ -92,7 +93,7 @@ public class ItemsAdderHelper {
         if (itemId.contains(":") && itemsAdderEnabled) {
             try {
                 Class<?> itemsAdderClass = Class.forName("dev.lone.itemsadder.api.ItemsAdder");
-                java.lang.reflect.Method isCustomItemMethod = itemsAdderClass.getMethod("isCustomItem", String.class);
+                Method isCustomItemMethod = itemsAdderClass.getMethod("isCustomItem", String.class);
                 Boolean isCustom = (Boolean) isCustomItemMethod.invoke(null, itemId);
                 if (isCustom != null && isCustom) {
                     return true;

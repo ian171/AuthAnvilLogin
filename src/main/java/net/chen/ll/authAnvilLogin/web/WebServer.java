@@ -48,14 +48,16 @@ public class WebServer extends NanoHTTPD {
 
         try {
             // 静态资源
-            if (uri.equals("/") || uri.equals("/index.html")) {
-                return serveFile("web/index.html", "text/html");
-            }
-            if (uri.equals("/style.css")) {
-                return serveFile("web/style.css", "text/css");
-            }
-            if (uri.equals("/script.js")) {
-                return serveFile("web/script.js", "application/javascript");
+            switch (uri) {
+                case "/", "/index.html" -> {
+                    return serveFile("web/index.html", "text/html");
+                }
+                case "/style.css" -> {
+                    return serveFile("web/style.css", "text/css");
+                }
+                case "/script.js" -> {
+                    return serveFile("web/script.js", "application/javascript");
+                }
             }
 
             // API 端点
@@ -185,8 +187,6 @@ public class WebServer extends NanoHTTPD {
     public void startServer() {
         try {
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
-            getLogger().info("Web管理面板已启动: http://localhost:" + getListeningPort());
-            getLogger().info("访问令牌: " + accessToken);
         } catch (IOException e) {
             getLogger().severe("启动Web服务器失败: " + e.getMessage());
         }

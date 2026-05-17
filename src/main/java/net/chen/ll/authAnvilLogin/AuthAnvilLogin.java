@@ -172,12 +172,10 @@ public final class AuthAnvilLogin extends JavaPlugin {
     @Override
     public void onDisable() {
         logger.info("ProAuthMeLogin disabling");
-
         // 停止 Web 服务器
         if (webServer != null) {
             webServer.stopServer();
         }
-
         Handler.api = null;
         Handler.loginAttempts.clear();
         logger.info("AuthAnvilLogin "+version+" disabled");

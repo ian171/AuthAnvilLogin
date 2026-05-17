@@ -1,5 +1,5 @@
 package net.chen.ll.authAnvilLogin.api;
 
-public enum GuiCatagory{
+public enum GuiCategory {
     LOGIN,REGISTER;
 }

@@ -8,12 +8,11 @@ public final class ApiManager {
     public static AuthAnvilLogin getAnvilApi(){
         return AuthAnvilLogin.instance;
     }
-    public static void openGui(Player player,GuiCatagory guiCatagory,AuthAnvilLogin authAnvilLogin){
-        authAnvilLogin.logger.info(player.getName()+" opens LoginGui");
-
-        if(guiCatagory == GuiCatagory.LOGIN){
+    @Deprecated(forRemoval = true, since = "2.2.4")
+    public static void openGui(Player player, GuiCategory guiCategory, AuthAnvilLogin authAnvilLogin){
+        if(guiCategory == GuiCategory.LOGIN){
             Handler.getInstance().openLoginUI(player);
-        }else if (guiCatagory == GuiCatagory.REGISTER){
+        }else if (guiCategory == GuiCategory.REGISTER){
             Handler.getInstance().openRegisterUI(player);
         }
     }
