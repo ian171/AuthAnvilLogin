@@ -12,6 +12,8 @@ import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
+import net.chen.ll.authAnvilLogin.core.SecurityQuestionManager;
+import net.chen.ll.authAnvilLogin.core.SecurityQuestionManager.VerifyResult;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
 import net.chen.ll.authAnvilLogin.util.*;
 import net.kyori.adventure.text.Component;
@@ -433,6 +435,204 @@ public class Handler implements Listener {
         player.showDialog(dialog);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
+    public void openSetQuestionDialog(Player player) {
+        if (!Config.securityQuestionEnabled) return;
+        if (player.getProtocolVersion() < 772) {
+            player.sendMessage("§e你的客户端版本不支持安全问题设置，可联系管理员手动绑定。");
+            return;
+        }
+        if (Config.securityQuestions.isEmpty()) {
+            player.sendMessage("§c管理员尚未配置安全问题，功能已跳过。");
+            return;
+        }
+
+        StringBuilder questionList = new StringBuilder("请选择一道安全问题并填写答案：\n");
+        for (int i = 0; i < Config.securityQuestions.size(); i++) {
+            questionList.append(i + 1).append(". ").append(Config.securityQuestions.get(i)).append("\n");
+        }
+
+        DialogActionCallback submitCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            String indexStr = response.getText("question-index");
+            String answer = response.getText("answer");
+            if (indexStr == null || answer == null || answer.isBlank()) {
+                p.sendMessage("§c请填写题目编号和答案！");
+                return;
+            }
+            int idx;
+            try {
+                idx = Integer.parseInt(indexStr.trim()) - 1;
+            } catch (NumberFormatException e) {
+                p.sendMessage("§c题目编号必须是数字！");
+                return;
+            }
+            if (idx < 0 || idx >= Config.securityQuestions.size()) {
+                p.sendMessage("§c题目编号超出范围，请填写 1~" + Config.securityQuestions.size());
+                return;
+            }
+            SecurityQuestionManager.getInstance().setQuestion(p.getName(), idx, answer);
+            p.sendMessage("§a安全问题设置成功！");
+        };
+
+        DialogActionCallback skipCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            p.sendMessage("§e已跳过安全问题设置，之后可通过 /al account 设置。");
+        };
+
+        ClickCallback.Options cbOptions = ClickCallback.Options.builder()
+                .uses(1)
+                .lifetime(Duration.ofMinutes(10))
+                .build();
+
+        ActionButton confirmButton = ActionButton.builder(Component.text("确认设置"))
+                .width(150)
+                .action(DialogAction.customClick(submitCallback, cbOptions))
+                .build();
+
+        ActionButton skipButton = ActionButton.builder(Component.text("跳过"))
+                .width(150)
+                .action(DialogAction.customClick(skipCallback, cbOptions))
+                .build();
+
+        DialogBase base = DialogBase.builder(Component.text("设置安全问题"))
+                .canCloseWithEscape(false)
+                .afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(List.of(DialogBody.plainMessage(Component.text(questionList.toString()), 350)))
+                .inputs(List.of(
+                        DialogInput.text("question-index", Component.text("题目编号（如：1）"))
+                                .width(80).maxLength(2).multiline(null).build(),
+                        DialogInput.text("answer", Component.text("你的答案"))
+                                .width(250).maxLength(64).multiline(null).build()
+                ))
+                .build();
+
+        Dialog dialog = Dialog.create(factory ->
+                factory.empty().base(base).type(DialogType.confirmation(confirmButton, skipButton)));
+        player.showDialog(dialog);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public void openForgotPasswordDialog(Player player) {
+        if (player.getProtocolVersion() < 772) {
+            player.sendMessage("§c你的客户端版本不支持此功能，请联系管理员重置密码。");
+            return;
+        }
+
+        SecurityQuestionManager sqm = SecurityQuestionManager.getInstance();
+
+        if (!sqm.hasQuestion(player.getName())) {
+            player.sendMessage("§c你尚未设置安全问题，请联系管理员重置密码。");
+            return;
+        }
+        if (sqm.isLocked(player.getName())) {
+            long sec = sqm.getRemainingLockSeconds(player.getName());
+            player.sendMessage("§c答案错误次数过多，请 " + sec + " 秒后再试，或联系管理员。");
+            return;
+        }
+
+        String question = sqm.getQuestion(player.getName());
+
+        DialogActionCallback submitCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            String answer = response.getText("answer");
+            if (answer == null || answer.isBlank()) {
+                p.sendMessage("§c请输入答案！");
+                p.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                        t -> openForgotPasswordDialog(p), null, 5L);
+                return;
+            }
+            VerifyResult result = sqm.verifyAnswer(p.getName(), answer);
+            switch (result) {
+                case CORRECT -> openNewPasswordDialog(p);
+                case WRONG -> {
+                    int remaining = Config.maxAnswerAttempts - sqm.getRemainingFailedAttempts(p.getName());
+                    if (sqm.isLocked(p.getName())) {
+                        p.sendMessage("§c答案错误次数过多，已锁定5分钟，请联系管理员。");
+                    } else {
+                        p.sendMessage("§c答案错误！还剩 " + remaining + " 次机会。");
+                        p.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                                t -> openForgotPasswordDialog(p), null, 10L);
+                    }
+                }
+                case LOCKED -> p.sendMessage("§c已被锁定，请联系管理员。");
+                case NOT_SET -> p.sendMessage("§c未设置安全问题，请联系管理员。");
+            }
+        };
+
+        DialogActionCallback cancelCallback = (response, audience) -> {};
+
+        ClickCallback.Options cbOptions = ClickCallback.Options.builder()
+                .uses(1).lifetime(Duration.ofMinutes(10)).build();
+
+        ActionButton submitButton = ActionButton.builder(Component.text("提交答案"))
+                .width(150).action(DialogAction.customClick(submitCallback, cbOptions)).build();
+        ActionButton cancelButton = ActionButton.builder(Component.text("取消"))
+                .width(150).action(DialogAction.customClick(cancelCallback, cbOptions)).build();
+
+        DialogBase base = DialogBase.builder(Component.text("找回密码"))
+                .canCloseWithEscape(false)
+                .afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(List.of(DialogBody.plainMessage(Component.text("安全问题：" + question), 350)))
+                .inputs(List.of(
+                        DialogInput.text("answer", Component.text("你的答案"))
+                                .width(250).maxLength(64).multiline(null).build()
+                ))
+                .build();
+
+        Dialog dialog = Dialog.create(factory ->
+                factory.empty().base(base).type(DialogType.confirmation(submitButton, cancelButton)));
+        player.showDialog(dialog);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    public void openNewPasswordDialog(Player player) {
+        DialogActionCallback submitCallback = (response, audience) -> {
+            if (!(audience instanceof Player p)) return;
+            String newPassword = response.getText("new-password");
+            String validationError = validateRegisterPassword(newPassword);
+            if (validationError != null) {
+                p.sendActionBar(Component.text("§c" + validationError));
+                p.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                        t -> openNewPasswordDialog(p), null, 10L);
+                return;
+            }
+            SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
+                boolean success = api.changePassword(p, newPassword);
+                p.getScheduler().run(AuthAnvilLogin.instance, task -> {
+                    if (success) {
+                        p.sendMessage("§a密码重置成功！请重新登录。");
+                        openLoginUI(p);
+                    } else {
+                        p.sendMessage("§c密码重置失败，请联系管理员。");
+                    }
+                }, null);
+            });
+        };
+
+        ClickCallback.Options cbOptions = ClickCallback.Options.builder()
+                .uses(1).lifetime(Duration.ofMinutes(10)).build();
+
+        ActionButton submitButton = ActionButton.builder(Component.text("确认重置"))
+                .width(150).action(DialogAction.customClick(submitCallback, cbOptions)).build();
+
+        DialogBase base = DialogBase.builder(Component.text("设置新密码"))
+                .canCloseWithEscape(false)
+                .afterAction(DialogBase.DialogAfterAction.CLOSE)
+                .body(List.of(DialogBody.plainMessage(Component.text("请输入新密码（6-16位）"), 300)))
+                .inputs(List.of(
+                        DialogInput.text("new-password", Component.text("新密码"))
+                                .width(250).maxLength(64).multiline(null).build()
+                ))
+                .build();
+
+        Dialog dialog = Dialog.create(factory ->
+                factory.empty().base(base)
+                        .type(DialogType.confirmation(submitButton,
+                                ActionButton.builder(Component.text("取消")).width(150).action(null).build())));
+        player.showDialog(dialog);
+    }
+
     public void openLoginUI(Player player) {
         if(player.getProtocolVersion() >= 772){
             if (isUseDialogGui){
@@ -546,7 +746,15 @@ public class Handler implements Listener {
                                         t -> openLoginUI(player), null, 10L);
                             } else {
                                 statisticsManager.recordLockout(player, ip);
-                                player.kickPlayer("登录失败次数过多，已被锁定5分钟");
+                                if (Config.securityQuestionEnabled
+                                        && SecurityQuestionManager.getInstance().hasQuestion(player.getName())
+                                        && player.getProtocolVersion() >= 772) {
+                                    player.sendMessage("§e登录失败次数过多！你可以通过安全问题找回密码。");
+                                    player.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                                            t -> openForgotPasswordDialog(player), null, 10L);
+                                } else {
+                                    player.kickPlayer("登录失败次数过多，已被锁定5分钟");
+                                }
                             }
                         }
                     }, null);
@@ -698,6 +906,10 @@ public class Handler implements Listener {
                         player.closeInventory();
                         player.sendMessage("注册成功😀！");
                         sendAgreement(player);
+                        if (Config.securityQuestionEnabled) {
+                            player.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                                    t -> openSetQuestionDialog(player), null, 20L);
+                        }
 
                         securityManager.logRegistration(player);
                         statisticsManager.recordRegistration(player, ip);
