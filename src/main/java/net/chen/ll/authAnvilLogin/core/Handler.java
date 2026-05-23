@@ -458,6 +458,8 @@ public class Handler implements Listener {
             String answer = response.getText("answer");
             if (indexStr == null || answer == null || answer.isBlank()) {
                 p.sendMessage("§c请填写题目编号和答案！");
+                p.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                        t -> openSetQuestionDialog(p), null, 10L);
                 return;
             }
             int idx;
@@ -465,10 +467,14 @@ public class Handler implements Listener {
                 idx = Integer.parseInt(indexStr.trim()) - 1;
             } catch (NumberFormatException e) {
                 p.sendMessage("§c题目编号必须是数字！");
+                p.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                        t -> openSetQuestionDialog(p), null, 10L);
                 return;
             }
             if (idx < 0 || idx >= Config.securityQuestions.size()) {
                 p.sendMessage("§c题目编号超出范围，请填写 1~" + Config.securityQuestions.size());
+                p.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                        t -> openSetQuestionDialog(p), null, 10L);
                 return;
             }
             SecurityQuestionManager.getInstance().setQuestion(p.getName(), idx, answer);
@@ -598,15 +604,17 @@ public class Handler implements Listener {
                 return;
             }
             SchedulerUtil.runAsyncOnce(AuthAnvilLogin.instance, () -> {
-                boolean success = api.changePassword(p, newPassword);
-                p.getScheduler().run(AuthAnvilLogin.instance, task -> {
-                    if (success) {
+                try {
+                    api.changePassword(p.getName(), newPassword);
+                    p.getScheduler().run(AuthAnvilLogin.instance, task -> {
                         p.sendMessage("§a密码重置成功！请重新登录。");
                         openLoginUI(p);
-                    } else {
-                        p.sendMessage("§c密码重置失败，请联系管理员。");
-                    }
-                }, null);
+                    }, null);
+                } catch (Exception e) {
+                    getLogger().severe("密码重置失败: " + e.getMessage());
+                    p.getScheduler().run(AuthAnvilLogin.instance, task ->
+                            p.sendMessage("§c密码重置失败，请联系管理员。"), null);
+                }
             });
         };
 
