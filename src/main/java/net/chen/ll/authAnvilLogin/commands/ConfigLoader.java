@@ -110,15 +110,15 @@ public class ConfigLoader {
         } catch (Exception e) {
             getLogger().warning("qsetting.yml 加载失败，安全问题功能已禁用: " + e.getMessage());
             Config.securityQuestionEnabled = false;
-        }finally {
-            if (isConfigValid) {
-                getLogger().info("配置文件读取成功");
-            }
-            if (isDebug){
-                getLogger().info("Config Version:"+ Config.getVer());
-                for (String key : config.getKeys(false)) {
-                    Bukkit.getServer().sendMessage(Component.empty().content(key + ":" + config.get(key)));
-                }
+        }
+
+        if (isConfigValid) {
+            getLogger().info("配置文件读取成功");
+        }
+        if (isDebug){
+            getLogger().info("Config Version:"+ Config.getVer());
+            for (String key : config.getKeys(false)) {
+                Bukkit.getServer().sendMessage(Component.empty().content(key + ":" + config.get(key)));
             }
         }
     }
