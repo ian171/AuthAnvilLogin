@@ -30,6 +30,10 @@ public final class Config {
     public static List<String> agreements = new ArrayList<>();
     public static boolean isUsedPasswdGen = false;
     public static boolean isUseDialogGui = true;
+    // 安全问题配置
+    public static boolean securityQuestionEnabled = false;
+    public static int maxAnswerAttempts = 3;
+    public static List<String> securityQuestions = new ArrayList<>();
     public static List<AnvilSlot> enableSlots = new ArrayList<>();
     private static int ver;
 
