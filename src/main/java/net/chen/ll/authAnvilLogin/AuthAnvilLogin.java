@@ -5,6 +5,7 @@ import net.chen.ll.authAnvilLogin.commands.AccountSettingCommand;
 import net.chen.ll.authAnvilLogin.commands.ConfigLoader;
 import net.chen.ll.authAnvilLogin.core.Config;
 import net.chen.ll.authAnvilLogin.core.Handler;
+import net.chen.ll.authAnvilLogin.core.SecurityQuestionManager;
 import net.chen.ll.authAnvilLogin.core.placeholder.StatusPlaceholder;
 import net.chen.ll.authAnvilLogin.gui.AccountManagerGui;
 import net.chen.ll.authAnvilLogin.gui.BedrockGui;
@@ -35,7 +36,7 @@ public final class AuthAnvilLogin extends JavaPlugin {
     public static AuthMeApi api = AuthMeApi.getInstance();
     public static String runtime;
     public static String plugin_path ;
-    public static String version = "2.2.4";
+    public static String version = "2.2.5";
     public static String lastest = "";
     public boolean isFastLoginEnabled = false;
     public static AuthAnvilLogin instance;
@@ -108,7 +109,8 @@ public final class AuthAnvilLogin extends JavaPlugin {
         instance = this;
         logger = this.getLogger();
         ConfigLoader.loadConfig();
-        logger.info(version+" Version By Chen");
+        SecurityQuestionManager.getInstance().load();
+        logger.info(version+" Version By Chen✶ ");
         isFastLoginEnabled =  Bukkit.getPluginManager().isPluginEnabled("FastLogin");
         if(isFastLoginEnabled){
             Bukkit.getPluginManager().disablePlugin(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("FastLogin")));
