@@ -16,7 +16,7 @@ public class SecurityQuestionManager {
     public enum VerifyResult { CORRECT, WRONG, LOCKED, NOT_SET }
 
     private static final long LOCK_DURATION_MS = 5 * 60 * 1000L;
-    private static SecurityQuestionManager instance;
+    private static final SecurityQuestionManager instance = new SecurityQuestionManager();
 
     private File dataFile;
     private FileConfiguration data;
@@ -25,9 +25,6 @@ public class SecurityQuestionManager {
     private SecurityQuestionManager() {}
 
     public static SecurityQuestionManager getInstance() {
-        if (instance == null) {
-            instance = new SecurityQuestionManager();
-        }
         return instance;
     }
 
@@ -36,7 +33,7 @@ public class SecurityQuestionManager {
         return logger;
     }
 
-    public void load() {
+    public synchronized void load() {
         dataFile = new File(AuthAnvilLogin.instance.getDataFolder(), "security_questions.yml");
         if (!dataFile.exists()) {
             dataFile.getParentFile().mkdirs();
@@ -49,7 +46,7 @@ public class SecurityQuestionManager {
         data = YamlConfiguration.loadConfiguration(dataFile);
     }
 
-    public void save() {
+    public synchronized void save() {
         if (data == null || dataFile == null) return;
         try {
             data.save(dataFile);
@@ -58,13 +55,13 @@ public class SecurityQuestionManager {
         }
     }
 
-    public boolean hasQuestion(String playerName) {
+    public synchronized boolean hasQuestion(String playerName) {
         return data != null && data.contains(playerName + ".answer-hash");
     }
 
-    public void setQuestion(String playerName, int questionIndex, String rawAnswer) {
+    public synchronized void setQuestion(String playerName, int questionIndex, String rawAnswer) {
         if (data == null) return;
-        String hash = sha256(rawAnswer.toLowerCase().trim());
+        String hash = sha256(rawAnswer.toLowerCase(java.util.Locale.ROOT).trim());
         data.set(playerName + ".question-index", questionIndex);
         data.set(playerName + ".answer-hash", hash);
         data.set(playerName + ".failed-attempts", 0);
@@ -72,14 +69,15 @@ public class SecurityQuestionManager {
         save();
     }
 
-    public VerifyResult verifyAnswer(String playerName, String rawAnswer) {
+    public synchronized VerifyResult verifyAnswer(String playerName, String rawAnswer) {
         if (data == null || !hasQuestion(playerName)) return VerifyResult.NOT_SET;
 
         long lockedUntil = data.getLong(playerName + ".locked-until", 0L);
         if (System.currentTimeMillis() < lockedUntil) return VerifyResult.LOCKED;
 
-        String stored = data.getString(playerName + ".answer-hash", "");
-        String input = sha256(rawAnswer.toLowerCase().trim());
+        String stored = data.getString(playerName + ".answer-hash");
+        if (stored == null) return VerifyResult.NOT_SET;
+        String input = sha256(rawAnswer.toLowerCase(java.util.Locale.ROOT).trim());
 
         if (stored.equals(input)) {
             data.set(playerName + ".failed-attempts", 0);
@@ -99,40 +97,41 @@ public class SecurityQuestionManager {
         return VerifyResult.WRONG;
     }
 
-    public boolean isLocked(String playerName) {
+    public synchronized boolean isLocked(String playerName) {
         if (data == null) return false;
         long lockedUntil = data.getLong(playerName + ".locked-until", 0L);
         return System.currentTimeMillis() < lockedUntil;
     }
 
-    public long getRemainingLockSeconds(String playerName) {
+    public synchronized long getRemainingLockSeconds(String playerName) {
         if (data == null) return 0;
         long lockedUntil = data.getLong(playerName + ".locked-until", 0L);
         long remaining = lockedUntil - System.currentTimeMillis();
         return remaining > 0 ? remaining / 1000 : 0;
     }
 
-    public String getQuestion(String playerName) {
+    public synchronized String getQuestion(String playerName) {
         if (data == null) return null;
         int idx = data.getInt(playerName + ".question-index", -1);
-        if (idx < 0 || idx >= Config.securityQuestions.size()) return null;
-        return Config.securityQuestions.get(idx);
+        java.util.List<String> questions = Config.securityQuestions;
+        if (idx < 0 || idx >= questions.size()) return null;
+        return questions.get(idx);
     }
 
-    public void resetQuestion(String playerName) {
+    public synchronized void resetQuestion(String playerName) {
         if (data == null) return;
         data.set(playerName, null);
         save();
     }
 
-    public void clearLock(String playerName) {
+    public synchronized void clearLock(String playerName) {
         if (data == null || !data.contains(playerName)) return;
         data.set(playerName + ".locked-until", 0L);
         data.set(playerName + ".failed-attempts", 0);
         save();
     }
 
-    public int getRemainingFailedAttempts(String playerName) {
+    public synchronized int getRemainingFailedAttempts(String playerName) {
         if (data == null) return 0;
         return data.getInt(playerName + ".failed-attempts", 0);
     }
