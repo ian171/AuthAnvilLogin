@@ -58,7 +58,7 @@ public class Handler implements Listener {
         }
         return logger;
     }
-    public static final String[] subCommands = {"reload","list","login","register","stats"};
+    public static final String[] subCommands = {"reload","list","login","register","stats","forgot","resetpw"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     private static final Map<UUID, Boolean> pendingAuthentication = new ConcurrentHashMap<>();
     private static LoginAttemptManager attemptManager;
