@@ -2,12 +2,14 @@ package net.chen.ll.authAnvilLogin.commands;
 
 import net.chen.ll.authAnvilLogin.AuthAnvilLogin;
 import net.chen.ll.authAnvilLogin.core.Config;
+import net.chen.ll.authAnvilLogin.core.CustomConfig;
 import net.chen.ll.authAnvilLogin.util.AnvilSlot;
 import net.chen.ll.authAnvilLogin.util.ItemsAdderHelper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
@@ -19,6 +21,7 @@ import static net.chen.ll.authAnvilLogin.core.Config.*;
 public class ConfigLoader {
     private static Logger logger;
     public static Configuration config = AuthAnvilLogin.instance.getConfig();
+    private static CustomConfig qSettingConfig;
 
     private static Logger getLogger() {
         if (logger == null) {
@@ -95,6 +98,18 @@ public class ConfigLoader {
         } catch (NullPointerException e) {
             getLogger().warning("配置文件读取失败，使用默认值");
             isConfigValid = false;
+        }
+
+        // 加载安全问题配置
+        try {
+            qSettingConfig = new CustomConfig(AuthAnvilLogin.instance, "qsetting.yml");
+            FileConfiguration qcfg = qSettingConfig.getConfig();
+            Config.securityQuestionEnabled = qcfg.getBoolean("enabled", false);
+            Config.maxAnswerAttempts = qcfg.getInt("max-answer-attempts", 3);
+            Config.securityQuestions = qcfg.getStringList("questions");
+        } catch (Exception e) {
+            getLogger().warning("qsetting.yml 加载失败，安全问题功能已禁用: " + e.getMessage());
+            Config.securityQuestionEnabled = false;
         }finally {
             if (isConfigValid) {
                 getLogger().info("配置文件读取成功");
