@@ -36,6 +36,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +62,7 @@ public class Handler implements Listener {
     public static final String[] subCommands = {"reload","list","login","register","stats","forgot","resetpw"};
     public static final Map<UUID,Integer> loginAttempts= new ConcurrentHashMap<>();
     private static final Map<UUID, Boolean> pendingAuthentication = new ConcurrentHashMap<>();
+    private static final Set<UUID> pendingPostRegistration = ConcurrentHashMap.newKeySet();
     private static LoginAttemptManager attemptManager;
     private static SecurityManager securityManager;
     private static StatisticsManager statisticsManager;
@@ -175,6 +177,7 @@ public class Handler implements Listener {
         UUID playerUUID = player.getUniqueId();
         loginAttempts.remove(playerUUID);
         pendingAuthentication.remove(playerUUID);
+        pendingPostRegistration.remove(playerUUID);
         // 移除手动GC调用，让JVM自动管理内存
     }
 
@@ -202,12 +205,28 @@ public class Handler implements Listener {
         Player player = event.getPlayer();
         UUID playerUUID = player.getUniqueId();
 
-        // 标记该玩家已通过 AuthMe 注册，不需要打开 GUI
         pendingAuthentication.put(playerUUID, false);
 
-        if (isDebug) {
-            getLogger().info(player.getName() + " registered via AuthMe, skipping AnvilGUI");
+        if (!pendingPostRegistration.remove(playerUUID)) {
+            if (isDebug) {
+                getLogger().info(player.getName() + " registered via AuthMe, skipping AnvilGUI");
+            }
+            return;
         }
+
+        // Folia 路径：performCommand 异步注册完成，现在做后续处理
+        player.getScheduler().run(AuthAnvilLogin.instance, task -> {
+            player.closeInventory();
+            player.sendMessage("注册成功😀！");
+            sendAgreement(player);
+            if (Config.securityQuestionEnabled) {
+                player.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                        t -> openSetQuestionDialog(player), null, 20L);
+            }
+            securityManager.logRegistration(player);
+            statisticsManager.recordRegistration(player, securityManager.getRealIP(player));
+            getLogger().info(player.getName() + " 注册成功");
+        }, null);
     }
 
     /**
@@ -909,20 +928,26 @@ public class Handler implements Listener {
                 // 切回玩家实体调度器执行 AuthMe 注册/登录及游戏操作
                 player.getScheduler().run(AuthAnvilLogin.instance, task -> {
                     try {
-                        api.forceRegister(player, password);
-                        api.forceLogin(player);
-                        player.closeInventory();
-                        player.sendMessage("注册成功😀！");
-                        sendAgreement(player);
-                        if (Config.securityQuestionEnabled) {
-                            player.getScheduler().runDelayed(AuthAnvilLogin.instance,
-                                    t -> openSetQuestionDialog(player), null, 20L);
+                        if (!SchedulerUtil.isFolia()) {
+                            api.forceRegister(player, password);
+                            api.forceLogin(player);
+                            player.closeInventory();
+                            player.sendMessage("注册成功😀！");
+                            sendAgreement(player);
+                            if (Config.securityQuestionEnabled) {
+                                player.getScheduler().runDelayed(AuthAnvilLogin.instance,
+                                        t -> openSetQuestionDialog(player), null, 20L);
+                            }
+                            securityManager.logRegistration(player);
+                            statisticsManager.recordRegistration(player, ip);
+                            getLogger().info(player.getName() + " 注册成功");
+                        } else {
+                            pendingPostRegistration.add(player.getUniqueId());
+                            player.performCommand("reg "+password+" "+password);
+                            // 注册后续操作由 onAuthMeRegister 在 RegisterEvent 触发后处理
                         }
-
-                        securityManager.logRegistration(player);
-                        statisticsManager.recordRegistration(player, ip);
-                        getLogger().info(player.getName() + " 注册成功");
                     } catch (Exception e) {
+                        pendingPostRegistration.remove(player.getUniqueId());
                         getLogger().severe("注册失败: " + e.getMessage());
                         if (isDebug) e.printStackTrace();
                         player.sendMessage("注册出错，请重试");

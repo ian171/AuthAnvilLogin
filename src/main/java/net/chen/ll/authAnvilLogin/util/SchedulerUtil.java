@@ -8,6 +8,9 @@ import org.bukkit.plugin.Plugin;
 import java.util.concurrent.TimeUnit;
 
 public final class SchedulerUtil {
+    public static boolean isFolia(){
+        return Bukkit.getServer().getName().equalsIgnoreCase("Folia");
+    }
 
     public static ScheduledTask runAsyncRepeating(
             Plugin plugin,
