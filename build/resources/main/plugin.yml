@@ -1,5 +1,5 @@
 name: ProAuthMeLogin
-version: '2.2.3-Stable'
+version: '2.2.5-Stable'
 main: net.chen.ll.authAnvilLogin.AuthAnvilLogin
 api-version: '1.21'
 load: POSTWORLD

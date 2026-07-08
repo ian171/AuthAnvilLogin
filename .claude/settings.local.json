@@ -20,7 +20,10 @@
       "WebFetch(domain:jd.papermc.io)",
       "WebSearch",
       "Bash(unzip *)",
-      "Bash(./gradlew compileJava)"
+      "Bash(./gradlew compileJava)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []

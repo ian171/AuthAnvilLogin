@@ -61,7 +61,13 @@ public class ConfigLoader {
             // Web 管理面板配置
             WEB_ENABLED = config.getBoolean("web.enabled", true);
             WEB_PORT = config.getInt("web.port", 8080);
-            WEB_TOKEN = config.getString("web.token", generateRandomToken());
+            WEB_TOKEN = config.getString("web.token", "");
+            if (WEB_TOKEN.isEmpty()) {
+                WEB_TOKEN = generateRandomToken();
+                AuthAnvilLogin.instance.getConfig().set("web.token", WEB_TOKEN);
+                AuthAnvilLogin.instance.saveConfig();
+                getLogger().info("[Web面板] 已自动生成访问令牌: " + WEB_TOKEN);
+            }
 
             if (isDebug) {
                 getLogger().warning("You are using unsupported functions,We do not recommend you to do that!");

@@ -454,7 +454,7 @@ public class Handler implements Listener {
 
         DialogActionCallback submitCallback = (response, audience) -> {
             if (!(audience instanceof Player p)) return;
-            String indexStr = response.getText("question-index");
+            String indexStr = response.getText("question_index");
             String answer = response.getText("answer");
             if (indexStr == null || answer == null || answer.isBlank()) {
                 p.sendMessage("§c请填写题目编号和答案！");
@@ -506,7 +506,7 @@ public class Handler implements Listener {
                 .afterAction(DialogBase.DialogAfterAction.CLOSE)
                 .body(List.of(DialogBody.plainMessage(Component.text(questionList.toString()), 350)))
                 .inputs(List.of(
-                        DialogInput.text("question-index", Component.text("题目编号（如：1）"))
+                        DialogInput.text("question_index", Component.text("题目编号（如：1）"))
                                 .width(80).maxLength(2).multiline(null).build(),
                         DialogInput.text("answer", Component.text("你的答案"))
                                 .width(250).maxLength(64).multiline(null).build()
@@ -595,7 +595,7 @@ public class Handler implements Listener {
     public void openNewPasswordDialog(Player player) {
         DialogActionCallback submitCallback = (response, audience) -> {
             if (!(audience instanceof Player p)) return;
-            String newPassword = response.getText("new-password");
+            String newPassword = response.getText("new_password");
             String validationError = validateRegisterPassword(newPassword);
             if (validationError != null) {
                 p.sendActionBar(Component.text("§c" + validationError));
@@ -629,7 +629,7 @@ public class Handler implements Listener {
                 .afterAction(DialogBase.DialogAfterAction.CLOSE)
                 .body(List.of(DialogBody.plainMessage(Component.text("请输入新密码（6-16位）"), 300)))
                 .inputs(List.of(
-                        DialogInput.text("new-password", Component.text("新密码"))
+                        DialogInput.text("new_password", Component.text("新密码"))
                                 .width(250).maxLength(64).multiline(null).build()
                 ))
                 .build();

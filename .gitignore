@@ -120,3 +120,4 @@ build/
 build/reports
 .gradle
 /.gradle/
+/docs/
