@@ -17,8 +17,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    #permissions:
-    #  contents: read
+    permissions:
+      contents: read
 
     steps:
     - uses: actions/checkout@v4
@@ -32,37 +32,16 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-    # 3. 确保 gradlew 文件有执行权限
-    - name: Grant execute permission to gradlew
-      run: chmod +x ./gradlew
-    # 4. 如果 gradle-wrapper.jar 不存在，则运行 gradle wrapper 来生成它
-    - name: Generate Gradle Wrapper if missing
-      run: |
-        if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-          echo "gradle-wrapper.jar not found, generating it."
-          ./gradlew wrapper
-        else
-          echo "gradle-wrapper.jar already exists."
-        fi
-
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
-
-    # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
-    # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
-    #
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
       with:
-         gradle-version: '8.9'
-
-    - name: Build with Gradle 8.9
-      run: gradle build
-    - name: Run shadow
-      run: gradle shadowJar
-
-    - name: Archive build artifacts
-      run: | 
-        mkdir -p artifacts
-        cp build/libs/*.jar artifacts/
+        name: my-gradle-build-output # 下载时的压缩包名称
+        # 根据你的项目类型修改路径：
+        # Java/Spring Boot 一般在 build/libs/
+        # Android 一般在 app/build/outputs/apk/debug/
+        path: build/libs/*.jar 
+        retention-days: 90 # 可选：设置保留天数（默认90天）
